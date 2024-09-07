@@ -12,15 +12,15 @@
 
   // Define the videos array with the Video type in the specified order
   let videos: Video[] = [
-    { id: 1, name: 'Myrto & Derek', youtubeId: 'oojG3E82yzQ', thumbnail: '/src/lib/image/1.png', description: 'Myrto & Derek' },
-    { id: 2, name: 'Claire et Martin', youtubeId: 'I-h4WH3tVcc', thumbnail: '/src/lib/image/2.png', description: 'Claire et Martin' },
-    { id: 3, name: 'Nathalie & Christophe', youtubeId: 'gZJyI-PGTHI', thumbnail: '/src/lib/image/3.png', description: 'Nathalie & Christophe' },
-    { id: 4, name: 'Les Nuits du Réal', youtubeId: 'R2PnDV97Zrg', thumbnail: '/src/lib/image/4.png', description: 'Les Nuits du Réal' },
-    { id: 5, name: 'La Lucarne d\'Arianne', youtubeId: '3d6SlZscoeM', thumbnail: '/src/lib/image/5.png', description: 'La Lucarne d\'Arianne' },
-    { id: 6, name: 'Litographie - Marko Zoric', youtubeId: 'stdlTlbi_o0', thumbnail: '/src/lib/image/6.png', description: 'Litographie - Marko Zoric' },
-    { id: 7, name: 'Unlocked - Sophie Jarmouni', youtubeId: 'YKA3anXENjQ', thumbnail: '/src/lib/image/7.png', description: 'Unlocked - Sophie Jarmouni' },
-    { id: 8, name: 'Rien qu\'ça - GOHU', youtubeId: 'DSNs7fQifyM', thumbnail: '/src/lib/image/8.png', description: 'Rien qu\'ça - GOHU' },
-    { id: 9, name: 'Hold Up - Yautjaxx', youtubeId: 'lOygdbJni8A', thumbnail: '/src/lib/image/9.png', description: 'Hold Up - Yautjaxx' },
+    { id: 1, name: 'Myrto & Derek', youtubeId: 'oojG3E82yzQ', thumbnail: '/image/1.png', description: 'Myrto & Derek' },
+    { id: 2, name: 'Claire et Martin', youtubeId: 'I-h4WH3tVcc', thumbnail: '/image/2.png', description: 'Claire et Martin' },
+    { id: 3, name: 'Nathalie & Christophe', youtubeId: 'gZJyI-PGTHI', thumbnail: '/image/3.png', description: 'Nathalie & Christophe' },
+    { id: 4, name: 'Les Nuits du Réal', youtubeId: 'R2PnDV97Zrg', thumbnail: '/image/4.png', description: 'Les Nuits du Réal' },
+    { id: 5, name: 'La Lucarne d\'Arianne', youtubeId: '3d6SlZscoeM', thumbnail: '/image/5.png', description: 'La Lucarne d\'Arianne' },
+    { id: 6, name: 'Litographie - Marko Zoric', youtubeId: 'stdlTlbi_o0', thumbnail: '/image/6.png', description: 'Litographie - Marko Zoric' },
+    { id: 7, name: 'Unlocked - Sophie Jarmouni', youtubeId: 'YKA3anXENjQ', thumbnail: '/image/7.png', description: 'Unlocked - Sophie Jarmouni' },
+    { id: 8, name: 'Rien qu\'ça - GOHU', youtubeId: 'DSNs7fQifyM', thumbnail: '/image/8.png', description: 'Rien qu\'ça - GOHU' },
+    { id: 9, name: 'Hold Up - Yautjaxx', youtubeId: 'lOygdbJni8A', thumbnail: '/image/9.png', description: 'Hold Up - Yautjaxx' },
   ];
 
   // Define selectedVideo with the Video type or null
@@ -62,23 +62,21 @@
 <style>
 .video-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(33%, 1fr)); /* Ensure each image takes up 33% */
-  gap: 0px; /* 2px gap between each grid item */
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
+  grid-template-columns: repeat(3, 1fr); /* Exactly 3 equal columns */
+  width: 100%; /* Ensure the grid takes up 100% of the available width */
+  margin: -4px;
+  padding: -1px;
   box-sizing: border-box;
 }
 
 .video-item {
-  position: auto;
+  position: relative;
   cursor: pointer;
   overflow: hidden;
   border: none;
   background: none;
-  width: 100%;
-  aspect-ratio: 2.39 / 1; /* Ensure all thumbnails maintain a 2.39:1 aspect ratio */
+  aspect-ratio: 2.39 / 1; /* Keep 2.39:1 aspect ratio for thumbnails */
+  width: 100%; /* Ensure each grid item takes up full width in its cell */
 }
 
 .thumbnail-wrapper {
@@ -91,9 +89,9 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
+  width: 102%;
   height: 100%;
-  object-fit: contain; /* Ensure image is fully visible without cropping */
+  object-fit: contain; /* Ensure the image fits within the box */
   transition: opacity 0.3s ease;
 }
 

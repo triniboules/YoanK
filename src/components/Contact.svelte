@@ -5,7 +5,7 @@
   <div class="contact-modal">
     <button class="close-btn" on:click={close} aria-label="Close contact">X</button>
     <div class="contact-content">
-      <img src="/src/lib/image/contact1.png" alt="Contact" class="contact-image" />
+      <img src="/image/contact1.png" alt="Contact" class="contact-image" />
    
     </div>
   </div>

@@ -14,14 +14,14 @@
   
   <header>
 	<div class="logo-left">
-	  <img src="/src/lib/image/NOM.png" alt="Logo Left" />
+	  <img src="/image/NOM.png" alt="Logo Left" />
 	</div>
 	<div class="logo-center">
-	  <img src="/src/lib/image/logo.png" alt="Logo Center" />
+	  <img src="/image/logo.png" alt="Logo Center" />
 	</div>
 	<div class="contact">
 	  <button class="contact-button" on:click={openContact} aria-label="Contact">
-		<img src="/src/lib/image/contact.png" alt="Contact" />
+		<img src="/image/contact.png" alt="Contact" />
 	  </button>
 	</div>
   </header>
