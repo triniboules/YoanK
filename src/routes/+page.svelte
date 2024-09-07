@@ -33,4 +33,3 @@
 		justify-content: center;
 	}
 </style>
-git commit -m "Initial commit"

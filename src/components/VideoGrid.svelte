@@ -64,8 +64,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr); /* Exactly 3 equal columns */
   width: 100%; /* Ensure the grid takes up 100% of the available width */
-  margin: -4px;
-  padding: -1px;
+  padding-bottom: 0px;
   box-sizing: border-box;
 }
 
@@ -89,9 +88,9 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 102%;
-  height: 100%;
-  object-fit: contain; /* Ensure the image fits within the box */
+  width: 101%;
+  height: 99%;
+  object-fit: fill; /* Ensure the image fits within the box */
   transition: opacity 0.3s ease;
 }
 
