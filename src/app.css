@@ -22,7 +22,6 @@ html, body {
   margin: 0;
   padding: 0;
   width: 100%;
-  overflow: hidden; /* Prevent all scrolling */
   background-color: var(--color-bg-1); /* Black background */
 }
 
@@ -30,6 +29,7 @@ html, body {
 body {
   display: flex;
   flex-direction: column;
+  min-height: 100vh; /* Ensure body takes up full viewport height */
 }
 
 /* Main content area */
@@ -43,13 +43,13 @@ main {
 
 /* Footer styling */
 footer {
-  height: 80px; /* Fixed height for the footer */
-  padding: 0.5%;
+  height: 0px; /* Fixed height for the footer */
+  padding: 0%;
   text-align: center;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: #666;
   background-color: #000000;
-  margin: 0; /* Ensure no margin is applied */
+  margin-bottom: -0px; /* Ensure no margin is applied */
 }
 
 /* Remove default margin from paragraph in footer */
