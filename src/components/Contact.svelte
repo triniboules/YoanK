@@ -26,7 +26,7 @@
 </div>
 
 <style>
-  .contact-modal {
+.contact-modal {
     position: fixed;
     top: 0;
     left: 0;
@@ -50,20 +50,29 @@
     width: 100%; /* Default width is 100% */
     max-width: 1000px; /* Maximum width for larger screens */
     box-sizing: border-box; /* Ensure padding is included in the width calculation */
+    padding: 0 2rem; /* Add horizontal padding */
 }
 
 /* Media query for screens less than 1000px wide */
 @media (max-width: 1000px) {
     .contact-content {
-        width: 80%; /* Set width to 80% for smaller screens */
+        width: 75%; /* Set width to 75% for smaller screens */
         max-width: none; /* Remove max-width restriction for smaller screens */
+        padding: 0; /* Remove horizontal padding */
+    }
+}
+
+/* Media query for screens less than 600px wide */
+@media (max-width: 600px) {
+    .contact-content {
+        width: 90%; /* Set width to 90% for very small screens */
     }
 }
 
 .close-btn {
     position: absolute;
-    top: -7%; /* Fixed distance from the top of .contact-content */
-    right: -5%; /* Fixed distance from the right of .contact-content */
+    top: -9%; /* Adjust position relative to the content */
+    right: 2%; /* Adjust position relative to the content */
     background: none;
     border: none;
     padding: 0;
@@ -87,7 +96,7 @@
     align-items: center;
     background-color: #ffffff; /* Light card background */
     border-radius: 20px;
-    padding: 2rem 2rem; /* Slightly reduced padding for better balance */
+    padding: 2rem; /* Slightly reduced padding for better balance */
     max-width: 420px;
     margin: 0 auto;
     text-align: center;
