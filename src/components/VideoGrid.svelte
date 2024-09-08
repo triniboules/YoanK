@@ -8,13 +8,14 @@
     youtubeId: string;  // Changed from youtubeUrl to youtubeId
     thumbnail: string;
     description: string;
+    showLogo?: boolean; // Optional property to determine if the DA SYNCRO logo should be displayed
   }
 
   // Define the videos array with the Video type in the specified order
   let videos: Video[] = [
-    { id: 1, name: 'Myrto & Derek', youtubeId: 'oojG3E82yzQ', thumbnail: '/image/1.png', description: 'Myrto & Derek' },
-    { id: 2, name: 'Claire et Martin', youtubeId: 'I-h4WH3tVcc', thumbnail: '/image/2.png', description: 'Claire et Martin' },
-    { id: 3, name: 'Nathalie & Christophe', youtubeId: 'gZJyI-PGTHI', thumbnail: '/image/3.png', description: 'Nathalie & Christophe' },
+    { id: 1, name: 'Myrto & Derek', youtubeId: 'oojG3E82yzQ', thumbnail: '/image/1.png', description: 'Myrto & Derek', showLogo: true },
+    { id: 2, name: 'Claire et Martin', youtubeId: 'I-h4WH3tVcc', thumbnail: '/image/2.png', description: 'Claire et Martin', showLogo: true },
+    { id: 3, name: 'Nathalie & Christophe', youtubeId: 'gZJyI-PGTHI', thumbnail: '/image/3.png', description: 'Nathalie & Christophe', showLogo: true },
     { id: 4, name: 'Les Nuits du Réal', youtubeId: 'R2PnDV97Zrg', thumbnail: '/image/4.png', description: 'Les Nuits du Réal' },
     { id: 5, name: 'La Lucarne d\'Arianne', youtubeId: '3d6SlZscoeM', thumbnail: '/image/5.png', description: 'La Lucarne d\'Arianne' },
     { id: 6, name: 'Litographie - Marko Zoric', youtubeId: 'stdlTlbi_o0', thumbnail: '/image/6.png', description: 'Litographie - Marko Zoric' },
@@ -51,6 +52,9 @@
     <button class="video-item" on:click={() => openVideo(video)} aria-label={`Open ${video.name}`}>
       <div class="thumbnail-wrapper">
         <img src={video.thumbnail} alt={video.name} class="thumbnail" />
+        {#if video.showLogo}
+          <img src="/image/Da.png" alt="DA SYNCRO logo" class="logo" />
+        {/if}
       </div>
       <div class="overlay">
         <p>{video.name}</p>
@@ -62,9 +66,10 @@
 <style>
 .video-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* Exactly 3 equal columns */
-  width: 100%; /* Ensure the grid takes up 100% of the available width */
-  padding-bottom: 0px;
+  grid-template-columns: repeat(3, 1fr); /* Default: 3 columns */
+  gap: 10px; /* Add some space between items */
+  width: 100%;
+  padding-bottom: 0;
   box-sizing: border-box;
 }
 
@@ -75,7 +80,7 @@
   border: none;
   background: none;
   aspect-ratio: 2.39 / 1; /* Keep 2.39:1 aspect ratio for thumbnails */
-  width: 100%; /* Ensure each grid item takes up full width in its cell */
+  width: 100%;
 }
 
 .thumbnail-wrapper {
@@ -90,12 +95,21 @@
   left: 0;
   width: 101%;
   height: 99%;
-  object-fit: fill; /* Ensure the image fits within the box */
+  object-fit: fill;
   transition: opacity 0.3s ease;
 }
 
 .video-item:hover .thumbnail {
   opacity: 0.7;
+}
+
+.logo {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 100px;
+  height: auto;
+  z-index: 1;
 }
 
 .overlay {
@@ -110,5 +124,18 @@
 
 .video-item:hover .overlay {
   display: block;
+}
+
+/* Responsive styles */
+@media (max-width: 1200px) {
+  .video-grid {
+    grid-template-columns: repeat(2, 1fr); /* Two columns for screens smaller than 1200px */
+  }
+}
+
+@media (max-width: 800px) {
+  .video-grid {
+    grid-template-columns: 1fr; /* One column for screens smaller than 800px */
+  }
 }
 </style>
