@@ -67,7 +67,7 @@
 .video-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr); /* Default: 3 columns */
-  gap: 10px; /* Add some space between items */
+
   width: 100%;
   padding-bottom: 0;
   box-sizing: border-box;
