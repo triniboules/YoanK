@@ -1,5 +1,15 @@
 <script>
   export let close = () => {};
+
+  let isEnglish = false; // Flag to toggle between languages
+
+  const toggleLanguage = () => {
+    isEnglish = !isEnglish;
+  };
+
+  // Text content
+  const frenchText = "Créateur de contenus vidéo pour artistes, mariages, entreprises, clips musicaux et tout type d'événements. Chaque projet est pour moi une occasion d'allier rigueur et créativité pour concrétiser vos idées avec précision. Je vous accompagne de la conceptualisation à la réalisation, afin de donner vie à vos projets avec professionnalisme.";
+  const englishText = "Video content creator for artists, weddings, businesses, music videos, and all types of events. Each project is an opportunity for me to combine rigor and creativity to bring your ideas to life with precision. I support you from conceptualization to realization, to bring your projects to life with professionalism.";
 </script>
 
 <div class="contact-modal">
@@ -16,8 +26,9 @@
       <h2>Yoann Kittery</h2>
       <div class="glass-effect">
         <p class="justified-text">
-          Créateur de contenus vidéo pour artistes, mariages, entreprises, clips musicaux et tout type d'événements. Chaque projet est pour moi une occasion d'allier rigueur et créativité pour concrétiser vos idées avec précision. Je vous accompagne de la conceptualisation à la réalisation, afin de donner vie à vos projets avec professionnalisme.
+          {isEnglish ? englishText : frenchText}
         </p>
+        <button class="language-toggle" on:click={toggleLanguage} aria-label="Toggle language"></button>
       </div>
       <div class="contact-info">
         <p> <a href="mailto:yoannkittery@gmail.com">yoannkittery@gmail.com</a></p>
@@ -147,15 +158,13 @@ h2 {
 
 /* Glass effect only for the main text */
 
-
 /* Justified text */
 .justified-text {
-  text-indent: 1.5rem; /* Adjust the indentation of the first line */
+  text-indent: 1.5rem;
   margin-top: 10px;
-
-    font-size: 1.125rem;
-    color: #444;
-    line-height: 1.2;
+  font-size: 1.125rem;
+  color: #272727;
+  line-height: 1.2;
 }
 
 /* Contact info styling */
@@ -175,8 +184,21 @@ h2 {
 }
 
 /* System font stack */
- p, h2, a {
+p, h2, a {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Invisible button */
+.language-toggle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 1000;
 }
 
 /* Media query for screens less than 1000px wide */

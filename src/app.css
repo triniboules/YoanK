@@ -240,3 +240,19 @@ header {
     display: none; /* Hide contact button on smaller screens */
   }
 }
+
+/* Language transition animation */
+.rolling-up {
+  animation: rollUp 1s ease forwards;
+}
+
+@keyframes rollUp {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
