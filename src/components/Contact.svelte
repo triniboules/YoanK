@@ -18,8 +18,8 @@
         Créateur de contenus vidéo pour artistes, mariages, entreprises, clips musicaux et tout type d'événements. Chaque projet est pour moi une nouvelle opportunité de m'investir avec rigueur et sens de l'écoute. Je vous accompagne à chaque étape, de la conceptualisation à la réalisation, pour donner vie à vos idées avec créativité et professionnalisme.
       </p>
       <div class="contact-info">
-        <p>Email: <a href="mailto:yoann@example.com">yoann@example.com</a></p>
-        <p>Phone: <a href="tel:+1234567890">+1 (234) 567-890</a></p>
+        <p>Email: <a href="mailto:yoannkittery@gmail.com">yoannkittery@gmail.com</a></p>
+        
       </div>
     </div>
   </div>
@@ -50,7 +50,7 @@
     width: 100%; /* Default width is 100% */
     max-width: 1000px; /* Maximum width for larger screens */
     box-sizing: border-box; /* Ensure padding is included in the width calculation */
-    padding: 0 2rem; /* Add horizontal padding */
+    padding: -10%; /* Add horizontal padding */
 }
 
 /* Media query for screens less than 1000px wide */
@@ -63,15 +63,17 @@
 }
 
 /* Media query for screens less than 600px wide */
-@media (max-width: 600px) {
+@media (max-width: 800px) {
     .contact-content {
-        width: 90%; /* Set width to 90% for very small screens */
+        width: 85%; /* Set width to 90% for very small screens */
+        height: 80%;
     }
+    
 }
 
 .close-btn {
     position: absolute;
-    top: -9%; /* Adjust position relative to the content */
+    top: -4%; /* Adjust position relative to the content */
     right: 2%; /* Adjust position relative to the content */
     background: none;
     border: none;
