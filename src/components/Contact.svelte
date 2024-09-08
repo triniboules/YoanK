@@ -64,20 +64,27 @@
 
 /* Media query for screens less than 600px wide */
 @media (max-width: 800px) {
-    .contact-content {
-        width: 85%; /* Set width to 90% for very small screens */
-        height: 80%;
-    }
+  .contact-content {
+    position: relative;
+    background: rgba(0, 0, 0, 0); /* Transparent background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    max-width: 1000px;
+    box-sizing: border-box;
+    padding: 20px; /* Adjust padding as needed */
+}
+
     
 }
 
 .close-btn {
-    position: absolute;
-    top: -4%; /* Adjust position relative to the content */
-    right: 2%; /* Adjust position relative to the content */
+    position: static;
     background: none;
     border: none;
-    padding: 0;
+    padding-left: 420px;
     cursor: pointer;
     z-index: 1001;
 }
