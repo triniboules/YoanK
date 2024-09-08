@@ -97,9 +97,7 @@
 			display: none; /* Hide center logo and contact button on very small screens */
 		}
 		.logo-center {
-			position: static; /* Remove absolute positioning */
-			margin-right: auto; /* Push logo to the right */
-			padding-left: 25%;
+			display: none;
 		}
 		
 	}
