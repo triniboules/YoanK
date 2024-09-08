@@ -5,7 +5,7 @@
 <div class="contact-modal">
   <div class="contact-content">
     <button class="close-btn" on:click={close} aria-label="Close contact">
-      <img src="/image/X.png" alt="Close" class="close-icon" />
+      <img src="/image/X2.png" alt="Close" class="close-icon" />
     </button>
 
     <div class="profile-card">
@@ -14,77 +14,54 @@
         <img src="/image/proback.jpg" alt="Yoann Kittery Back" class="profile-image" />
       </div>
       <h2>Yoann Kittery</h2>
-      <p>
-        Créateur de contenus vidéo pour artistes, mariages, entreprises, clips musicaux et tout type d'événements. Chaque projet est pour moi une nouvelle opportunité de m'investir avec rigueur et sens de l'écoute. Je vous accompagne à chaque étape, de la conceptualisation à la réalisation, pour donner vie à vos idées avec créativité et professionnalisme.
-      </p>
+      <div class="glass-effect">
+        <p class="justified-text">
+          Créateur de contenus vidéo pour artistes, mariages, entreprises, clips musicaux et tout type d'événements. Chaque projet est pour moi une occasion d'allier rigueur et créativité pour concrétiser vos idées avec précision. Je vous accompagne de la conceptualisation à la réalisation, afin de donner vie à vos projets avec professionnalisme.
+        </p>
+      </div>
       <div class="contact-info">
-        <p>Email: <a href="mailto:yoannkittery@gmail.com">yoannkittery@gmail.com</a></p>
-        
+        <p> <a href="mailto:yoannkittery@gmail.com">yoannkittery@gmail.com</a></p>
       </div>
     </div>
   </div>
 </div>
 
 <style>
+/* Modal background */
 .contact-modal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.85); /* Darker for better contrast */
+    background: rgba(0, 0, 0, 0.85); 
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
-    transition: all 0.3s ease-in-out;
 }
 
+/* Modal content container */
 .contact-content {
-    position: relative; /* Ensure the close button is positioned relative to this container */
-    background: rgba(0, 0, 0, 0); /* Transparent background */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    width: 100%; /* Default width is 100% */
-    max-width: 1000px; /* Maximum width for larger screens */
-    box-sizing: border-box; /* Ensure padding is included in the width calculation */
-    padding: -10%; /* Add horizontal padding */
-}
-
-/* Media query for screens less than 1000px wide */
-@media (max-width: 1000px) {
-    .contact-content {
-        width: 75%; /* Set width to 75% for smaller screens */
-        max-width: none; /* Remove max-width restriction for smaller screens */
-        padding: 0; /* Remove horizontal padding */
-    }
-}
-
-/* Media query for screens less than 600px wide */
-@media (max-width: 800px) {
-  .contact-content {
     position: relative;
-    background: rgba(0, 0, 0, 0); /* Transparent background */
+    background: transparent;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
     width: 100%;
-    max-width: 1000px;
+    max-width: 500px;
+    padding: 20px;
     box-sizing: border-box;
-    padding: 20px; /* Adjust padding as needed */
 }
 
-    
-}
-
+/* Close button styles */
 .close-btn {
-    position: static;
+    position: absolute;
+    top: 6%;
+    right: 6%;
     background: none;
     border: none;
-    padding-left: 420px;
     cursor: pointer;
     z-index: 1001;
 }
@@ -92,26 +69,25 @@
 .close-icon {
     width: 24px;
     height: 24px;
-    object-fit: contain;
 }
 
 .close-btn:hover .close-icon {
     opacity: 0.8;
 }
 
+/* Profile card container */
 .profile-card {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-color: #ffffff; /* Light card background */
+    background-color: #ffffff;
     border-radius: 20px;
-    padding: 2rem; /* Slightly reduced padding for better balance */
+    padding: 2rem;
     max-width: 420px;
-    margin: 0 auto;
     text-align: center;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Deeper shadow for better focus */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease-in-out;
-    position: relative;
 }
 
 /* Avatar flip effect */
@@ -123,8 +99,8 @@
     position: relative;
     margin: auto;
     top: -70px;
+    box-shadow: 0 0 0 10px #e0e0e0;
     transition: all 0.3s ease-in-out;
-    box-shadow: 0 0 0 10px #ffffff;
 }
 
 .avatar-flip img {
@@ -162,30 +138,43 @@
 
 /* Header styling */
 h2 {
-    font-size: 2.25rem; /* Slightly larger font size for prominence */
+    font-size: 2.25rem;
     font-weight: 700;
-    color: #222; /* Darker color for better contrast */
-    margin-top: -40px; /* Adjust for avatar overlap */
-    margin-bottom: 1rem; /* Increased margin for better spacing */
+    color: #222;
+    margin-top: -50px;
+    margin-bottom: 1rem;
 }
 
-p {
-    font-size: 1.125rem; /* Larger font size for better readability */
-    color: #444; /* Darker color for better readability */
-    line-height: 1.6; /* Better readability */
-    margin-bottom: 0; /* Increased margin for better spacing */
-    padding: 0px; /* Added padding for better text alignment */
+/* Glass effect only for the main text */
+.glass-effect {
+    background: rgba(2, 2, 2, 0.034); /* Light transparent background */
+    border-radius: 5px;
+    backdrop-filter: blur(20px); /* Glass effect */
+    padding-right: 1rem;
+    padding-left: 1rem;
+    margin-top: 0px;
+    box-shadow: 0 9px 10px rgba(0, 0, 0, 0.459);
+}
+
+/* Justified text */
+.justified-text {
+  text-indent: 1.5rem; /* Adjust the indentation of the first line */
+  margin-top: 10px;
+    text-align: justify; /* Justified alignment for the text */
+    font-size: 1.125rem;
+    color: #444;
+    line-height: 1.6;
 }
 
 /* Contact info styling */
 .contact-info {
-    margin-top: 1.5rem;
+    margin-bottom: -8%;
     font-size: 1rem;
     color: #555;
 }
 
 .contact-info a {
-    color: #007bff; /* Link color */
+    color: #007bff;
     text-decoration: none;
 }
 
@@ -193,10 +182,22 @@ p {
     text-decoration: underline;
 }
 
-/* Subtle scaling effect on hover */
-.contact-content:hover .profile-card {
-    transform: scale(1.05); 
-    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.25); /* Deeper shadow on hover */
+/* System font stack */
+body, p, h2, a {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
+/* Media query for screens less than 1000px wide */
+@media (max-width: 1000px) {
+    .contact-content {
+        width: 75%;
+    }
+}
+
+/* Media query for screens less than 800px wide */
+@media (max-width: 800px) {
+    .contact-content {
+        width: 100%;
+    }
+}
 </style>
