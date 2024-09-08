@@ -43,7 +43,7 @@
         <main>
             <svelte:component this={videoGridComponent} />
             <footer>
-                <p>Website simply made by <a href="mailto:ksylvestre1@hotmail.com">Sylvestre</a> &copy; {new Date().getFullYear()}</p>
+                <p>Simply made by <a href="mailto:ksylvestre1@hotmail.com">Sylvestre</a> &copy; {new Date().getFullYear()}</p>
             </footer>
         </main>
     {/if}

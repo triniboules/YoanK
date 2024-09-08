@@ -69,7 +69,7 @@
   grid-template-columns: repeat(3, 1fr); /* Default: 3 columns */
 
   width: 100%;
-  padding-bottom: 0;
+  padding-bottom: 8px;
   box-sizing: border-box;
 }
 
