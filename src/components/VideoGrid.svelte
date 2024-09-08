@@ -13,15 +13,15 @@
 
   // Define the videos array with the Video type in the specified order
   let videos: Video[] = [
-    { id: 1, name: 'Myrto & Derek', youtubeId: 'oojG3E82yzQ', thumbnail: '/image/1.png', description: 'Myrto & Derek', showLogo: true },
-    { id: 2, name: 'Claire et Martin', youtubeId: 'I-h4WH3tVcc', thumbnail: '/image/2.png', description: 'Claire et Martin', showLogo: true },
-    { id: 3, name: 'Nathalie & Christophe', youtubeId: 'gZJyI-PGTHI', thumbnail: '/image/3.png', description: 'Nathalie & Christophe', showLogo: true },
-    { id: 4, name: 'Les Nuits du Réal', youtubeId: 'R2PnDV97Zrg', thumbnail: '/image/4.png', description: 'Les Nuits du Réal' },
-    { id: 5, name: 'La Lucarne d\'Arianne', youtubeId: '3d6SlZscoeM', thumbnail: '/image/5.png', description: 'La Lucarne d\'Arianne' },
-    { id: 6, name: 'Litographie - Marko Zoric', youtubeId: 'stdlTlbi_o0', thumbnail: '/image/6.png', description: 'Litographie - Marko Zoric' },
-    { id: 7, name: 'Unlocked - Sophie Jarmouni', youtubeId: 'YKA3anXENjQ', thumbnail: '/image/7.png', description: 'Unlocked - Sophie Jarmouni' },
-    { id: 8, name: 'Rien qu\'ça - GOHU', youtubeId: 'DSNs7fQifyM', thumbnail: '/image/8.png', description: 'Rien qu\'ça - GOHU' },
-    { id: 9, name: 'Hold Up - Yautjaxx', youtubeId: 'lOygdbJni8A', thumbnail: '/image/9.png', description: 'Hold Up - Yautjaxx' },
+    { id: 1, name: 'Myrto & Derek', youtubeId: 'oojG3E82yzQ', thumbnail: '/image/1.png', description: 'Myrto & Derek\nOpérateur Caméra', showLogo: true },
+    { id: 2, name: 'Claire et Martin', youtubeId: 'I-h4WH3tVcc', thumbnail: '/image/2.png', description: 'Claire et Martin\nOpérateur Caméra', showLogo: true },
+    { id: 3, name: 'Nathalie & Christophe', youtubeId: 'gZJyI-PGTHI', thumbnail: '/image/3.png', description: 'Nathalie & Christophe\nOpérateur Caméra', showLogo: true },
+    { id: 4, name: 'Les Nuits du Réal', youtubeId: 'R2PnDV97Zrg', thumbnail: '/image/4.png', description: 'Les Nuits du Réal\nOpérateur Caméra', showLogo: true  },
+    { id: 5, name: 'La Lucarne d\'Arianne', youtubeId: '3d6SlZscoeM', thumbnail: '/image/5.png', description: 'La Lucarne d\'Arianne\nRéalisation\nPrise de son\nOpérateur Caméra' },
+    { id: 6, name: 'Litographie - Marko Zoric', youtubeId: 'stdlTlbi_o0', thumbnail: '/image/6.png', description: 'Litographie - Marko Zoric\nRéalisation\nMontage' },
+    { id: 7, name: 'Unlocked - Sophie Jarmouni', youtubeId: 'YKA3anXENjQ', thumbnail: '/image/7.png', description: 'Unlocked - Sophie Jarmouni\nAssistant Caméra\nFocus puller' },
+    { id: 8, name: 'Rien qu\'ça - GOHU', youtubeId: 'DSNs7fQifyM', thumbnail: '/image/8.png', description: 'Rien qu\'ça - GOHU\nRéalisation\nPrise de vue\nMontage' },
+    { id: 9, name: 'Hold Up - Yautjaxx', youtubeId: 'lOygdbJni8A', thumbnail: '/image/9.png', description: 'Hold Up - Yautjaxx\nOpérateur Caméra\nPrise de vue' },
   ];
 
   // Define selectedVideo with the Video type or null
@@ -57,7 +57,7 @@
         {/if}
       </div>
       <div class="overlay">
-        <p>{video.name}</p>
+        <p class="description">{video.description}</p>
       </div>
     </button>
   {/each}
@@ -120,10 +120,16 @@
   color: white;
   text-align: center;
   display: none;
+  width: 100%;
 }
 
 .video-item:hover .overlay {
   display: block;
+}
+
+.description {
+  white-space: pre-line; /* Respect the new lines in the text */
+  font-size: 1rem; /* Adjust font size as needed */
 }
 
 /* Responsive styles */

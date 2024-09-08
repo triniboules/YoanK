@@ -86,7 +86,7 @@
     padding: 2rem;
     max-width: 420px;
     text-align: center;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease-in-out;
 }
 
@@ -99,7 +99,7 @@
     position: relative;
     margin: auto;
     top: -70px;
-    box-shadow: 0 0 0 10px #e0e0e0;
+    box-shadow: 0 0 0 10px #ffffff;
     transition: all 0.3s ease-in-out;
 }
 
@@ -146,24 +146,16 @@ h2 {
 }
 
 /* Glass effect only for the main text */
-.glass-effect {
-    background: rgba(2, 2, 2, 0.034); /* Light transparent background */
-    border-radius: 5px;
-    backdrop-filter: blur(20px); /* Glass effect */
-    padding-right: 1rem;
-    padding-left: 1rem;
-    margin-top: 0px;
-    box-shadow: 0 9px 10px rgba(0, 0, 0, 0.459);
-}
+
 
 /* Justified text */
 .justified-text {
   text-indent: 1.5rem; /* Adjust the indentation of the first line */
   margin-top: 10px;
-    text-align: justify; /* Justified alignment for the text */
+
     font-size: 1.125rem;
     color: #444;
-    line-height: 1.6;
+    line-height: 1.2;
 }
 
 /* Contact info styling */
@@ -183,7 +175,7 @@ h2 {
 }
 
 /* System font stack */
-body, p, h2, a {
+ p, h2, a {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
