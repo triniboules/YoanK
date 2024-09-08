@@ -99,7 +99,7 @@
 		.logo-center {
 			position: static; /* Remove absolute positioning */
 			margin-right: auto; /* Push logo to the right */
-			padding-left: 80%;
+			padding-left: 25%;
 		}
 		
 	}
