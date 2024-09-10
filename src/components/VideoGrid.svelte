@@ -15,11 +15,11 @@
     { id: 2, name: 'Claire et Martin', youtubeId: 'I-h4WH3tVcc', thumbnail: '/image/2.webp', description: 'Claire et Martin\nOpérateur Caméra', showLogo: true },
     { id: 3, name: 'Nathalie & Christophe', youtubeId: 'gZJyI-PGTHI', thumbnail: '/image/3.webp', description: 'Nathalie & Christophe\nOpérateur Caméra', showLogo: true },
     { id: 4, name: 'Les Nuits du Réal', youtubeId: 'R2PnDV97Zrg', thumbnail: '/image/4.webp', description: 'Les Nuits du Réal\nOpérateur Caméra', showLogo: true  },
-    { id: 5, name: 'La Lucarne d\'Arianne', youtubeId: '3d6SlZscoeM', thumbnail: '/image/5.webp', description: 'La Lucarne d\'Arianne\nRéalisation\nPrise de son\nOpérateur Caméra' },
-    { id: 6, name: 'Litographie - Marko Zoric', youtubeId: 'stdlTlbi_o0', thumbnail: '/image/6.webp', description: 'Litographie - Marko Zoric\nRéalisation\nMontage' },
+    { id: 5, name: 'La Lucarne d\'Arianne', youtubeId: '3d6SlZscoeM', thumbnail: '/image/5.webp', description: 'La Lucarne d\'Arianne\nRéalisation\nPrise de son\nOpérateur Caméra', showLogo: true },
+    { id: 6, name: 'Litographie - Marko Zoric', youtubeId: 'stdlTlbi_o0', thumbnail: '/image/6.webp', description: 'Litographie - Marko Zoric\nRéalisation\nMontage', showLogo: true },
     { id: 7, name: 'Unlocked - Sophie Jarmouni', youtubeId: 'YKA3anXENjQ', thumbnail: '/image/7.webp', description: 'Unlocked - Sophie Jarmouni\nAssistant Caméra\nFocus puller' },
-    { id: 8, name: 'Rien qu\'ça - GOHU', youtubeId: 'DSNs7fQifyM', thumbnail: '/image/8.webp', description: 'Rien qu\'ça - GOHU\nRéalisation\nPrise de vue\nMontage' },
-    { id: 9, name: 'Hold Up - Yautjaxx', youtubeId: 'lOygdbJni8A', thumbnail: '/image/9.webp', description: 'Hold Up - Yautjaxx\nOpérateur Caméra\nPrise de vue' },
+    { id: 8, name: 'Rien qu\'ça - GOHU', youtubeId: 'DSNs7fQifyM', thumbnail: '/image/8.webp', description: 'Rien qu\'ça - GOHU\nRéalisation\nPrise de vue\nMontage', showLogo: true },
+    { id: 9, name: 'Hold Up - Yautjaxx', youtubeId: 'lOygdbJni8A', thumbnail: '/image/9.webp', description: 'Hold Up - Yautjaxx\nOpérateur Caméra\nPrise de vue', showLogo: true },
   ];
 
   let selectedVideo: Video | null = null;
@@ -40,11 +40,6 @@
     const img = event.target as HTMLImageElement;
     img.style.opacity = '1';
   }
-
-  function handleLogoLoad(event: Event) {
-    const img = event.target as HTMLImageElement;
-    img.style.opacity = '1';
-  }
 </script>
 
 {#if selectedVideo}
@@ -57,7 +52,11 @@
       <div class="thumbnail-wrapper">
         <img src={video.thumbnail} alt={video.name} class="thumbnail" loading="lazy" on:load={handleImageLoad} style="opacity: 0; transition: opacity 3s ease;" />
         {#if video.showLogo}
-          <img src="/image/Da.webp" alt="DA SYNCRO logo" class="logo" on:load={handleLogoLoad} style="opacity: 0; transition: opacity 6s ease;" />
+          <!-- Dynamically adjust logo size for 'logo.webp' by 50% -->
+          <img 
+            src={video.id <= 4 ? '/image/Da.webp' : '/image/logo.webp'} 
+            alt={video.id <= 4 ? 'DA SYNCRO logo' : 'Alternate logo'} 
+            class="logo {video.id > 4 ? 'small-logo' : ''}" />
         {/if}
       </div>
       <div class="overlay">
@@ -112,10 +111,20 @@
     width: 100px;
     height: auto;
     z-index: 1;
-    opacity: 0;
-    transition: opacity 3s ease;
+    opacity: 0; /* Initially invisible */
+    transition: opacity 0.5s ease;
   }
 
+  /* Reduce size for logo.webp */
+  .small-logo {
+  transform: scale(0.5); /* Keep scaling to 50% */
+  position: absolute;
+  top: -0%;  /* Adjust this value to move it closer to the top */
+  left: -0%; /* Adjust this value to move it closer to the left */
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+} 
   .overlay {
     position: absolute;
     top: 50%;
@@ -127,8 +136,13 @@
     width: 100%;
   }
 
+  /* Show overlay and logo when hovering */
   .video-item:hover .overlay {
     display: block;
+  }
+
+  .video-item:hover .logo {
+    opacity: 1; /* Fade in the logo on hover */
   }
 
   .video-item:hover .thumbnail {
