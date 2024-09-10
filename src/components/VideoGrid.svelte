@@ -38,7 +38,12 @@
 
   function handleImageLoad(event: Event) {
     const img = event.target as HTMLImageElement;
-    img.style.opacity = '1'; // Set opacity to 1 when the image is fully loaded
+    img.style.opacity = '1';
+  }
+
+  function handleLogoLoad(event: Event) {
+    const img = event.target as HTMLImageElement;
+    img.style.opacity = '1';
   }
 </script>
 
@@ -52,7 +57,7 @@
       <div class="thumbnail-wrapper">
         <img src={video.thumbnail} alt={video.name} class="thumbnail" loading="lazy" on:load={handleImageLoad} style="opacity: 0; transition: opacity 3s ease;" />
         {#if video.showLogo}
-          <img src="/image/Da.webp" alt="DA SYNCRO logo" class="logo" />
+          <img src="/image/Da.webp" alt="DA SYNCRO logo" class="logo" on:load={handleLogoLoad} style="opacity: 0; transition: opacity 3s ease;" />
         {/if}
       </div>
       <div class="overlay">
@@ -64,87 +69,90 @@
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&display=swap');
-.video-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  width: 100%;
-  padding-bottom: 8px;
-  box-sizing: border-box;
-}
 
-.video-item {
-  position: relative;
-  cursor: pointer;
-  overflow: hidden;
-  border: none;
-  background: none;
-  aspect-ratio: 2.39 / 1;
-  width: 100%;
-}
-
-.thumbnail-wrapper {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.thumbnail {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 101%;
-  height: 99%;
-  object-fit: fill;
-  transition: opacity 0.3s ease;
-  opacity: 0; /* Start with opacity 0 */
-}
-
-.logo {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 100px;
-  height: auto;
-  z-index: 1;
-}
-
-.overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: white;
-  text-align: center;
-  display: none;
-  width: 100%;
-}
-
-.video-item:hover .overlay {
-  display: block;
-}
-
-.video-item:hover .thumbnail {
-  opacity: 0.4; /* Reduce opacity */
-  filter: blur(2px); /* Add blur effect */
-}
-
-.description {
-  white-space: pre-line;
-  font-size: 1rem; /* Keep the size as specified */
-  font-family: 'Roboto Slab', serif; /* Use Roboto Slab as the font */
-  color: white; /* Maintain readability */
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Subtle shadow effect */
-}
-
-@media (max-width: 1200px) {
   .video-grid {
-    grid-template-columns: repeat(2, 1fr);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    width: 100%;
+    padding-bottom: 8px;
+    box-sizing: border-box;
   }
-}
 
-@media (max-width: 800px) {
-  .video-grid {
-    grid-template-columns: 1fr;
+  .video-item {
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    border: none;
+    background: none;
+    aspect-ratio: 2.39 / 1;
+    width: 100%;
   }
-}
+
+  .thumbnail-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .thumbnail {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 101%;
+    height: 99%;
+    object-fit: fill;
+    transition: opacity 0.3s ease;
+    opacity: 0;
+  }
+
+  .logo {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 100px;
+    height: auto;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 3s ease;
+  }
+
+  .overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    text-align: center;
+    display: none;
+    width: 100%;
+  }
+
+  .video-item:hover .overlay {
+    display: block;
+  }
+
+  .video-item:hover .thumbnail {
+    opacity: 0.4;
+    filter: blur(2px);
+  }
+
+  .description {
+    white-space: pre-line;
+    font-size: 1rem;
+    font-family: 'Roboto Slab', serif;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  }
+
+  @media (max-width: 1200px) {
+    .video-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 800px) {
+    .video-grid {
+      grid-template-columns: 1fr;
+    }
+  }
 </style>
