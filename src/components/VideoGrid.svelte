@@ -57,7 +57,7 @@
       <div class="thumbnail-wrapper">
         <img src={video.thumbnail} alt={video.name} class="thumbnail" loading="lazy" on:load={handleImageLoad} style="opacity: 0; transition: opacity 3s ease;" />
         {#if video.showLogo}
-          <img src="/image/Da.webp" alt="DA SYNCRO logo" class="logo" on:load={handleLogoLoad} style="opacity: 0; transition: opacity 3s ease;" />
+          <img src="/image/Da.webp" alt="DA SYNCRO logo" class="logo" on:load={handleLogoLoad} style="opacity: 0; transition: opacity 6s ease;" />
         {/if}
       </div>
       <div class="overlay">
