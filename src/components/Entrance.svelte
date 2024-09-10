@@ -39,7 +39,7 @@
 	{#if isVisible}
 	  <button on:click={onAccess} aria-label="Click to enter" in:fade={{ duration: 1500 }}>
 		<!-- Fade in the image and button -->
-		<img src="/image/entrance.png" alt="Click to enter" />
+		<img src="/image/entrance.webp" alt="Click to enter" />
 	  </button>
 	{/if}
   </div>

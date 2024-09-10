@@ -15,13 +15,13 @@
 <div class="contact-modal">
   <div class="contact-content">
     <button class="close-btn" on:click={close} aria-label="Close contact">
-      <img src="/image/X2.png" alt="Close" class="close-icon" />
+      <img src="/image/X2.webp" alt="Close" class="close-icon" />
     </button>
 
     <div class="profile-card">
       <div class="avatar-flip">
-        <img src="/image/pro.png" alt="Yoann Kittery Front" class="profile-image" />
-        <img src="/image/proback.jpg" alt="Yoann Kittery Back" class="profile-image" />
+        <img src="/image/pro.webp" alt="Yoann Kittery Front" class="profile-image" />
+        <img src="/image/proback.webp" alt="Yoann Kittery Back" class="profile-image" />
       </div>
       <h2>Yoann Kittery</h2>
       <div class="glass-effect">

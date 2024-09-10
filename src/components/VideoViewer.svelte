@@ -16,7 +16,7 @@
 
 <div class="modal">
 <button class="close-btn" on:click={close} aria-label="Close video viewer">
-  <img src="/image/X.png" alt="Close" class="close-icon" />
+  <img src="/image/X.webp" alt="Close" class="close-icon" />
 </button>
 <div class="video-container">
   <iframe

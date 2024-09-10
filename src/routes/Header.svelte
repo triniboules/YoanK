@@ -21,17 +21,17 @@
 	<div class="logo-left">
 	  <!-- Wrap the logo image in a button for accessibility -->
 	  <button class="logo-button" on:click={openContact} aria-label="Open Contact">
-		<img src="/image/NOM.png" alt="Logo Left" />
+		<img src="/image/NOM.webp" alt="Logo Left" />
 	  </button>
 	</div>
 	<div class="logo-center">
 	  <button class="logo-center-button" on:click={refreshPage} aria-label="Refresh Page">
-		<img src="/image/logo.png" alt="Logo Center" />
+		<img src="/image/logo.webp" alt="Logo Center" />
 	  </button>
 	</div>
 	<div class="contact">
 	  <button class="contact-button" on:click={openContact} aria-label="Contact">
-		<img src="/image/contact.png" alt="Contact" />
+		<img src="/image/contact.webp" alt="Contact" />
 	  </button>
 	</div>
   </header>

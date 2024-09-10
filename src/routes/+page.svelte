@@ -40,25 +40,6 @@
 	{#if headerComponent && videoGridComponent}
 		<svelte:component this={headerComponent} />
 		<main>
-			<section id="about">
-				<h2>About Yoann Kittery</h2>
-				<p>Learn more about <a href="/about">Yoann Kittery and his professional background</a> in content creation and video production.</p>
-			</section>
-
-			<section id="services">
-				<h2>Our Services</h2>
-				<p>Explore the range of <a href="/services">video production services</a> we offer, including weddings, music videos, and corporate events.</p>
-			</section>
-
-			<section id="portfolio">
-				<h2>Portfolio</h2>
-				<p>Check out our <a href="/portfolio">recent projects and case studies</a> showcasing cinematic wedding films and corporate video content.</p>
-			</section>
-
-			<section id="contact">
-				<h2>Contact Us</h2>
-				<p>Get in touch with <a href="/contact">Yoann Kittery</a> to discuss your video production needs and schedule a consultation.</p>
-			</section>
 
 			<svelte:component this={videoGridComponent} />
 			<footer>
