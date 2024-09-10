@@ -1,15 +1,16 @@
-<script>
+<script lang="ts">
     export let close = () => {};
   
-    let isEnglish = false; // Flag to toggle between languages
+    let isEnglish: boolean = false; // Flag to toggle between languages
   
-    const toggleLanguage = () => {
+    // Function to toggle between English and French texts
+    const toggleLanguage = (): void => {
       isEnglish = !isEnglish;
     };
   
-    // Text content
-    const frenchText = "Créateur de contenus vidéo pour artistes, mariages, entreprises, clips musicaux et tout type d'événements. Chaque projet est pour moi une occasion d'allier rigueur et créativité pour concrétiser vos idées avec précision. Je vous accompagne de la conceptualisation à la réalisation, afin de donner vie à vos projets avec professionnalisme.";
-    const englishText = "Video content creator for artists, weddings, businesses, music videos, and all types of events. Each project is an opportunity for me to combine rigor and creativity to bring your ideas to life with precision. I support you from conceptualization to realization, to bring your projects to life with professionalism.";
+    // Text content in French and English
+    const frenchText: string = "Créateur de contenus vidéo pour artistes, mariages, entreprises, clips musicaux et tout type d'événements. Chaque projet est pour moi une occasion d'allier rigueur et créativité pour concrétiser vos idées avec précision. Je vous accompagne de la conceptualisation à la réalisation, afin de donner vie à vos projets avec professionnalisme.";
+    const englishText: string = "Video content creator for artists, weddings, businesses, music videos, and all types of events. Each project is an opportunity for me to combine rigor and creativity to bring your ideas to life with precision. I support you from conceptualization to realization, to bring your projects to life with professionalism.";
   </script>
   
   <div class="contact-modal">
@@ -31,11 +32,12 @@
           <button class="language-toggle" on:click={toggleLanguage} aria-label="Toggle language"></button>
         </div>
         <div class="contact-info">
-          <p> <a href="mailto:yoannkittery@gmail.com">yoannkittery@gmail.com</a></p>
+          <p><a href="mailto:yoannkittery@gmail.com">yoannkittery@gmail.com</a></p>
         </div>
       </div>
     </div>
   </div>
+  
   
   <style>
   /* Modal background */

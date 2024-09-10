@@ -1,17 +1,15 @@
 <script lang="ts">
   import VideoViewer from './VideoViewer.svelte';
 
-  // Define the type for a video object with youtubeId instead of youtubeUrl
   interface Video {
     id: number;
     name: string;
-    youtubeId: string;  // Changed from youtubeUrl to youtubeId
+    youtubeId: string;
     thumbnail: string;
     description: string;
-    showLogo?: boolean; // Optional property to determine if the DA SYNCRO logo should be displayed
+    showLogo?: boolean;
   }
 
-  // Define the videos array with the Video type in the specified order
   let videos: Video[] = [
     { id: 1, name: 'Myrto & Derek', youtubeId: 'oojG3E82yzQ', thumbnail: '/image/1.webp', description: 'Myrto & Derek\nOpérateur Caméra', showLogo: true },
     { id: 2, name: 'Claire et Martin', youtubeId: 'I-h4WH3tVcc', thumbnail: '/image/2.webp', description: 'Claire et Martin\nOpérateur Caméra', showLogo: true },
@@ -24,22 +22,23 @@
     { id: 9, name: 'Hold Up - Yautjaxx', youtubeId: 'lOygdbJni8A', thumbnail: '/image/9.webp', description: 'Hold Up - Yautjaxx\nOpérateur Caméra\nPrise de vue' },
   ];
 
-  // Define selectedVideo with the Video type or null
   let selectedVideo: Video | null = null;
 
-  // Define function with Video parameter type
   const openVideo = (video: Video) => {
     selectedVideo = video;
   };
 
-  // Define function to close the video viewer
   const closeVideo = () => {
     selectedVideo = null;
   };
 
-  // Function to construct the embed URL from the video ID
   function getEmbedUrl(videoId: string) {
     return `https://www.youtube.com/embed/${videoId}`;
+  }
+
+  function handleImageLoad(event: Event) {
+    const img = event.target as HTMLImageElement;
+    img.style.opacity = '1'; // Set opacity to 1 when the image is fully loaded
   }
 </script>
 
@@ -51,7 +50,7 @@
   {#each videos as video}
     <button class="video-item" on:click={() => openVideo(video)} aria-label={`Open ${video.name}`}>
       <div class="thumbnail-wrapper">
-        <img src={video.thumbnail} alt={video.name} class="thumbnail" />
+        <img src={video.thumbnail} alt={video.name} class="thumbnail" loading="lazy" on:load={handleImageLoad} style="opacity: 0; transition: opacity 3s ease;" />
         {#if video.showLogo}
           <img src="/image/Da.webp" alt="DA SYNCRO logo" class="logo" />
         {/if}
@@ -64,10 +63,10 @@
 </div>
 
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&display=swap');
 .video-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* Default: 3 columns */
-
+  grid-template-columns: repeat(3, 1fr);
   width: 100%;
   padding-bottom: 8px;
   box-sizing: border-box;
@@ -79,7 +78,7 @@
   overflow: hidden;
   border: none;
   background: none;
-  aspect-ratio: 2.39 / 1; /* Keep 2.39:1 aspect ratio for thumbnails */
+  aspect-ratio: 2.39 / 1;
   width: 100%;
 }
 
@@ -97,10 +96,7 @@
   height: 99%;
   object-fit: fill;
   transition: opacity 0.3s ease;
-}
-
-.video-item:hover .thumbnail {
-  opacity: 0.7;
+  opacity: 0; /* Start with opacity 0 */
 }
 
 .logo {
@@ -127,21 +123,28 @@
   display: block;
 }
 
-.description {
-  white-space: pre-line; /* Respect the new lines in the text */
-  font-size: 1rem; /* Adjust font size as needed */
+.video-item:hover .thumbnail {
+  opacity: 0.4; /* Reduce opacity */
+  filter: blur(2px); /* Add blur effect */
 }
 
-/* Responsive styles */
+.description {
+  white-space: pre-line;
+  font-size: 1rem; /* Keep the size as specified */
+  font-family: 'Roboto Slab', serif; /* Use Roboto Slab as the font */
+  color: white; /* Maintain readability */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Subtle shadow effect */
+}
+
 @media (max-width: 1200px) {
   .video-grid {
-    grid-template-columns: repeat(2, 1fr); /* Two columns for screens smaller than 1200px */
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 800px) {
   .video-grid {
-    grid-template-columns: 1fr; /* One column for screens smaller than 800px */
+    grid-template-columns: 1fr;
   }
 }
 </style>
