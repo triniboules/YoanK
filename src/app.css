@@ -1,5 +1,6 @@
 @import '@fontsource/fira-mono';
 
+
 /* Global CSS */
 :root {
   --font-body: Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
@@ -255,4 +256,9 @@ header {
     transform: translateY(-100%);
     opacity: 0;
   }
+}
+
+/* Hide scrollbar */
+.hide-scrollbar {
+  overflow-y: auto; /* Allow scrolling */
 }

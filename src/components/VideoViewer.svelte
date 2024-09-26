@@ -1,9 +1,13 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
 
+  // Define a prop for the selected video
   export let selectedVideo: { youtubeId: string; name: string; description: string };
+
+  // Create an event dispatcher to dispatch custom events
   const dispatch = createEventDispatcher();
 
+  // Function to close the modal and dispatch a 'close' event
   const close = () => {
     dispatch('close');
   };
@@ -14,11 +18,15 @@
   }
 </script>
 
+<!-- Modal component -->
 <div class="modal">
 <button class="close-btn" on:click={close} aria-label="Close video viewer">
+  <!-- Close icon image -->
   <img src="/image/X.webp" alt="Close" class="close-icon" />
 </button>
+<!-- Video container with background and padding -->
 <div class="video-container">
+  <!-- YouTube iframe to embed the selected video -->
   <iframe
     src={getEmbedUrl(selectedVideo.youtubeId)}
     frameborder="0"
@@ -31,6 +39,7 @@
 
 <style>
 .modal {
+  /* Fixed position to cover entire viewport */
   position: fixed;
   top: 0;
   left: 0;
@@ -45,6 +54,7 @@
 }
 
 .video-container {
+  /* Background and border radius for the video container */
   position: relative;
   background: rgba(202, 183, 176, 0.123);
   border-radius: 8px;
@@ -55,12 +65,14 @@
 }
 
 .video-frame {
+  /* Full width and height for the iframe, with no border */
   width: 100%;
   height: 60vh;
   border: 0;
 }
 
 .close-btn {
+  /* Positioning and styling for the close button */
   position: absolute;
   top: 15%;
   right: 13%;
@@ -81,3 +93,4 @@
   opacity: 0.8;
 }
 </style>
+

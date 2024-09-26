@@ -4,9 +4,11 @@
     <meta charset="utf-8" />
     <link rel="icon" href="%sveltekit.assets%/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    %sveltekit.head% <!-- This injects head-related elements like title, meta tags -->
-  </head>
-  <body data-sveltekit-preload-data="hover">
-    <div style="display: contents">%sveltekit.body%</div> <!-- This is where the app is injected -->
+     
+     <div style="display: contents">%sveltekit.head%</div>
+    <meta charset="utf-8" /> <!-- This sets the character encoding for the document -->
+    <link rel="icon" href="%sveltekit.assets%/favicon.png" /> <!-- This sets the favicon for the website -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" /> <!-- This sets the viewport settings for responsive design -->
+    <div style="display: contents">%sveltekit.body%</div> <!-- This is where the app is injected and displayed -->
   </body>
 </html>

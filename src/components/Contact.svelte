@@ -175,11 +175,13 @@
       margin-bottom: -8%;
       font-size: 1rem;
       color: #555;
+      z-index: 1001;
   }
   
   .contact-info a {
       color: #007bff;
       text-decoration: none;
+      z-index: 1001;
   }
   
   .contact-info a:hover {

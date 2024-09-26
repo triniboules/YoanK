@@ -1,5 +1,7 @@
 <script lang="ts">
   import VideoViewer from './VideoViewer.svelte';
+  import { db } from './firebase';
+  import { doc, setDoc, increment, arrayUnion } from "firebase/firestore";
 
   interface Video {
     id: number;
@@ -8,6 +10,8 @@
     thumbnail: string;
     description: string;
     showLogo?: boolean;
+    clickCount?: number;
+    clicks?: { userId: string; timestamp: Date }[];
   }
 
   let videos: Video[] = [
@@ -24,13 +28,32 @@
 
   let selectedVideo: Video | null = null;
 
-  const openVideo = (video: Video) => {
+  const openVideo = async (video: Video) => {
+    await recordVideoClick(video.id);
     selectedVideo = video;
   };
 
   const closeVideo = () => {
     selectedVideo = null;
   };
+
+  async function recordVideoClick(videoId: number) {
+    try {
+      const userId = localStorage.getItem('userId') || 'anonymous'; // Assuming userId is stored in localStorage
+      const clickTimestamp = new Date();
+
+      // 1. Enregistrer les statistiques globales de la vidéo
+      const videoRef = doc(db, "videos", `video-${videoId}`);
+      await setDoc(videoRef, {
+        clickCount: increment(1),
+        clicks: arrayUnion({ userId, timestamp: clickTimestamp }) // Optionnel : supprimer si tu n'as pas besoin de suivre les clics utilisateur au niveau vidéo.
+      }, { merge: true });
+
+      console.log(`Recorded click for Video ID: ${videoId} by User ID: ${userId}`);
+    } catch (error) {
+      console.error("Error recording video click: ", error);
+    }
+  }
 
   function getEmbedUrl(videoId: string) {
     return `https://www.youtube.com/embed/${videoId}`;
@@ -46,13 +69,13 @@
   <VideoViewer {selectedVideo} on:close={closeVideo} />
 {/if}
 
+
 <div class="video-grid">
   {#each videos as video}
     <button class="video-item" on:click={() => openVideo(video)} aria-label={`Open ${video.name}`}>
       <div class="thumbnail-wrapper">
         <img src={video.thumbnail} alt={video.name} class="thumbnail" loading="lazy" on:load={handleImageLoad} style="opacity: 0; transition: opacity 3s ease;" />
         {#if video.showLogo}
-          <!-- Dynamically adjust logo size for 'logo.webp' by 50% -->
           <img 
             src={video.id <= 4 ? '/image/Da.webp' : '/image/logo.webp'} 
             alt={video.id <= 4 ? 'DA SYNCRO logo' : 'Alternate logo'} 
@@ -73,7 +96,10 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     width: 100%;
-    padding-bottom: 8px;
+    padding-top: 2px;
+    padding-bottom: 0px;
+    padding-left: 10px;
+    padding-right: 10px;
     box-sizing: border-box;
   }
 
@@ -115,16 +141,16 @@
     transition: opacity 0.5s ease;
   }
 
-  /* Reduce size for logo.webp */
   .small-logo {
-  transform: scale(0.5); /* Keep scaling to 50% */
-  position: absolute;
-  top: -0%;  /* Adjust this value to move it closer to the top */
-  left: -0%; /* Adjust this value to move it closer to the left */
-  z-index: 1;
-  opacity: 0;
-  transition: opacity 0.5s ease, transform 0.5s ease;
-} 
+    transform: scale(0.5); /* Keep scaling to 50% */
+    position: absolute;
+    top: -0%;  /* Adjust this value to move it closer to the top */
+    left: -0%; /* Adjust this value to move it closer to the left */
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  } 
+
   .overlay {
     position: absolute;
     top: 50%;
@@ -136,7 +162,6 @@
     width: 100%;
   }
 
-  /* Show overlay and logo when hovering */
   .video-item:hover .overlay {
     display: block;
   }
