@@ -1,21 +1,24 @@
-node_modules
+# Node modules
+node_modules/
 
-# Output
-.output
-.vercel
-/.svelte-kit
-/build
+# Output directories
+.output/
+.vercel/
+.svelte-kit/
+build/
 
-# OS
+# OS generated files
 .DS_Store
 Thumbs.db
 
-# Env
+# Environment files
 .env
 .env.*
 !.env.example
 !.env.test
+# Ignore Firebase environment file
+src/FIREBASE.env
 
-# Vite
+# Vite configuration files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
