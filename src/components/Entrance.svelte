@@ -20,11 +20,7 @@
 
     // Function to store location in Firestore
     const storeLocation = async (lat: number, lon: number) => {
-        const location = {
-            lat: lat,
-            lon: lon,
-            timestamp: serverTimestamp()
-        };
+        const location = { lat, lon, timestamp: serverTimestamp() };
         try {
             await addDoc(collection(db, 'users', userId, 'locations'), location);
             console.log("Location stored:", location);
@@ -35,11 +31,7 @@
 
     // Function to store visits in Firestore
     const storeVisit = async (lat: number, lon: number) => {
-        const visit = {
-            timestamp: serverTimestamp(),
-            lat: lat,
-            lon: lon
-        };
+        const visit = { timestamp: serverTimestamp(), lat, lon };
         try {
             await addDoc(collection(db, 'users', userId, 'visits'), visit);
             console.log("Visit stored:", visit);
@@ -52,11 +44,7 @@
     const storeClickCount = async () => {
         const userClicksDoc = doc(db, 'users', userId);
         const docSnap = await getDoc(userClicksDoc);
-        let clickCount = 0;
-
-        if (docSnap.exists()) {
-            clickCount = docSnap.data().clickCount || 0;
-        }
+        let clickCount = docSnap.exists() ? (docSnap.data().clickCount || 0) : 0;
 
         await setDoc(userClicksDoc, {
             clickCount: clickCount + 1,
@@ -75,10 +63,12 @@
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
 
-                    // Store both location and visit details
-                    await storeLocation(lat, lon);
-                    await storeVisit(lat, lon);
-                    await storeClickCount();
+                    // Store location and visit concurrently
+                    await Promise.all([
+                        storeLocation(lat, lon),
+                        storeVisit(lat, lon),
+                        storeClickCount()
+                    ]);
 
                     onAccess();  // Call the external function to continue the workflow
                 }, (error) => {
@@ -92,6 +82,9 @@
         }
     };
 </script>
+
+
+
 
 <style>
     .entrance-container {
@@ -163,7 +156,6 @@
         transform: scale(1.1); /* Slightly enlarged during fade-out */
     }
 </style>
-
 <div class="entrance-container {isTransitioningOut ? 'transitioning-out' : ''}">
     <div class="overlay"></div>
     <button on:click={handleClick} aria-label="Yoann Kittery" in:fade={{ duration: 1500 }} tabindex="0">
