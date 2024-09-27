@@ -74,7 +74,7 @@
 
 <!-- UI Structure -->
 <div class="statistics-container">
-    <h2>Website Statistics</h2>
+   
     {#if loading}
         <p class="status-message">Loading statistics...</p>
     {:else if errorMessage}
@@ -120,12 +120,7 @@
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
-    h2 {
-        text-align: center;
-        color: #2c3e50;
-        margin-bottom: 20px;
-        font-size: 24px;
-    }
+
 
     .status-message {
         text-align: center;
@@ -169,9 +164,7 @@
             padding: 15px;
         }
 
-        h2 {
-            font-size: 20px;
-        }
+
 
         .stat-item {
             padding: 10px;

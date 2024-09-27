@@ -111,7 +111,7 @@
     {:else}
       <div class="flex-container">
         <div class="chart-container">
-          <h2 class="stats-title">Video Click Statistics</h2>
+       
           <PolarArea data={chartData} options={{
             responsive: true,
             plugins: {
@@ -153,9 +153,10 @@
       max-width: 1200px; /* Limit the maximum width */
       margin: auto; /* Center the container */
       padding: 20px; /* Padding around the container */
-      background: #f9f9f9; /* Light background for the stats */
+      background: #ffffff; /* Light background for the stats */
       border-radius: 8px; /* Rounded corners */
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+      margin-bottom: auto;
     }
   
     .flex-container {
@@ -164,6 +165,7 @@
       justify-content: space-between; /* Space items evenly */
       align-items: flex-start; /* Align items to the top */
       gap: 20px; /* Space between chart and legend */
+      margin-bottom: auto;
     }
   
     .chart-container {
@@ -174,19 +176,13 @@
       flex: 1 1 30%; /* Legend takes one column, but shrinks to 30% of container */
       max-width: 300px; /* Max width for the legend */
       padding: 10px; /* Add padding to the legend */
-      background: #ffffff; /* White background for the legend */
+      background: #ffffff31; /* White background for the legend */
       border: 1px solid #ddd; /* Light border for the legend */
       border-radius: 5px; /* Rounded corners for the legend */
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle shadow for legend */
     }
   
-    .stats-title {
-      margin-bottom: 10px; /* Space below title */
-      font-size: 1.5rem; /* Title size */
-      color: #34495e; /* Darker color */
-      text-align: left; /* Align title to the left */
-    }
-  
+
     .loading {
       text-align: center; /* Center the loading message */
       font-size: 1.2rem; /* Loading message size */
