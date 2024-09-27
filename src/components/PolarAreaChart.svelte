@@ -153,7 +153,7 @@
       max-width: 1200px; /* Limit the maximum width */
       margin: auto; /* Center the container */
       padding: 20px; /* Padding around the container */
-      background: #ffffff; /* Light background for the stats */
+      background: #ffffffa8; /* Light background for the stats */
       border-radius: 8px; /* Rounded corners */
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
       margin-bottom: auto;
@@ -167,10 +167,7 @@
       gap: 20px; /* Space between chart and legend */
       margin-bottom: auto;
     }
-  
-    .chart-container {
-      flex: 2 1 60%; /* Chart takes two columns, but shrinks to 60% of container */
-    }
+
   
     .legend-container {
       flex: 1 1 30%; /* Legend takes one column, but shrinks to 30% of container */
