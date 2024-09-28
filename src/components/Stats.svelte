@@ -27,7 +27,7 @@
             if (passwordInput === correctPassword) {
                 showSecret = true;
                 if (onAccess) {
-                    onAccess(); // Call the onAccess function to notify parent that access is granted
+                    onAccess(); // Notify parent that access is granted
                 }
             } else {
                 alert("Incorrect password. Try again.");
@@ -40,84 +40,100 @@
 </script>
 
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Russo+One&display=swap');
+
     /* Container styles */
     .container {
         display: flex;
-        padding: 20px;
-        font-family: 'Bank Gothic', sans-serif; /* Use the font */
-        background-color: #d0c4a100; /* Background color */
+        position: relative;
+        font-family: 'Russo One', sans-serif; /* Use the font */
+        background-image: url('/image/titre.webp');
         border: 2px solid #8b7b5d; /* Border style */
         border-radius: 10px; /* Rounded corners */
-        width: 80vw; /* 80% of viewport width */
+        width: 40vw; /* 80% of viewport width */
         height: 80vh; /* 80% of viewport height */
-        margin: auto; /* Center the container */
+        margin: 0 auto; /* Center the container */
         box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2); /* Shadow for depth */
-        background-image: url('/image/titre.webp');
-        background-size: 256px 256px; /* Background image size */
-        background-repeat: repeat; /* Repeat background image */
+        padding: 20px;
     }
 
     /* Header styles */
     .header {
         margin-bottom: 20px; /* Space below the header */
         text-align: center; /* Center header text */
-        color: rgba(0, 0, 0, 0.733); /* Header text color */
+        color: #000; /* Black text */
+        font-family: 'Press Start 2P', sans-serif;
     }
 
     /* Stats content area */
     .stats {
         flex-grow: 1; /* Allow stats section to grow */
         padding: 20px; /* Space inside stats */
-        background: rgba(117, 76, 30, 0.253); /* Semi-transparent white */
+        background: rgba(117, 76, 30, 0.1); /* Light background for content */
         border-radius: 10px; /* Rounded corners */
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Shadow effect */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
         margin-right: 20px; /* Space between stats and menu */
+        color: #000; /* Black text */
+        overflow-y: auto; /* Scroll content if needed */
     }
 
-    /* Tabs menu styles */
-    .menu {
-        display: flex; /* Align buttons in a column */
-        flex-direction: column; /* Column layout for tabs */
-        justify-content: start; /* Align tabs at the start */
-        width: 200px; /* Fixed width for the menu */
+    /* Intercalaires as tabs on the right */
+    .intercalaires {
+        position: absolute;
+        right: -40px; /* Position intercalaires outside container */
+        top: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100%; /* Full height of the container */
+        justify-content: flex-start;
+        align-items: center;
     }
 
-    button {
-        margin: 5px 0; /* Space between buttons */
-        padding: 10px; /* Padding for buttons */
-        border-radius: 5px; /* Rounded button corners */
-        border: none; /* No border */
-        background-color: #8b7b5d; /* Button background color */
-        color: white; /* Button text color */
-        cursor: pointer; /* Pointer cursor for buttons */
-        transition: background-color 0.3s; /* Transition for background color */
+    /* Intercalaire button style */
+    .intercalaires button {
+        margin: 10px 0;
+        padding: 0px;
+        border-radius: 20px; /* Rounded on the left side */
+        border: 2px solid #8b7b5d;
+        background-color: #472e00;
+        color: rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+        transition: background-color 0.3s;
+        width: 60px; /* Adjust width for tab look */
+        writing-mode: vertical-rl; /* Rotate the text */
+        height: 150px; /* Set height to fit rotated text */
+        text-align: center; /* Center text inside button */
+        font-family: 'Press Start 2P', sans-serif;
+     
     }
 
-    /* Active button styles */
-    .active {
-        background-color: #b9a68e00; /* Different shade for active button */
-        color: black; /* Active button text color */
+    .intercalaires button.active {
+        background-color: #a37b4c;
+        color: black;
     }
 
-    button:hover {
-        background-color: #6e5c4e; /* Darker color on hover */
+    .intercalaires button:hover {
+        background-color: #6e5c4e;
     }
 
     /* Input styles for target identification */
     .input-field {
         width: calc(100% - 20px); /* Full width with padding */
         padding: 10px; /* Padding for input fields */
-        border: 1px solid #cccccc10; /* Border style */
+        border: 1px solid #cccccc;
         border-radius: 5px; /* Rounded corners */
         margin-bottom: 10px; /* Space below input fields */
+        background-color: #f5f5f5;
+        color: #000; /* Black text */
     }
 
     /* Secret info styles */
     .secret-info {
         margin-top: 20px; /* Space above secret info */
         padding: 10px; /* Padding for secret info */
-        background-color: #f0f0f021; /* Background color for secret info */
+        background-color: #f0f0f0; /* Background color for secret info */
         border-radius: 5px; /* Rounded corners */
+        color: #000; /* Black text */
     }
 </style>
 
@@ -145,6 +161,7 @@
                 <p><strong>Weapon used:</strong> PP7 Silenced</p>
             {/if}
             {#if selectedTab === 3}
+            
                 <p><strong>Enemies eliminated:</strong> 45</p>
                 <p><strong>Critical hits:</strong> 5 (11%)</p>
                 <p><strong>Stealth success:</strong> 90%</p>
@@ -183,8 +200,9 @@
         </div>
     </div>
 
-    <!-- Menu with dynamic tabs -->
-    <div class="menu">
+    <!-- Intercalaires as tabs on the right -->
+    <div class="intercalaires">
+
         <button on:click={() => selectTab(1)} class:active={selectedTab === 1}>Stats 1</button>
         <button on:click={() => selectTab(2)} class:active={selectedTab === 2}>Stats 2</button>
         <button on:click={() => selectTab(3)} class:active={selectedTab === 3}>Stats 3</button>
