@@ -16,34 +16,47 @@
     let errorMessage: string | null = null; // Error message state
     let map: L.Map | null = null; // Map variable to be initialized later
 
-    // Function to fetch visits for a specific user
-    async function fetchVisits(userId: string) {
+    
+    // Function to fetch all visits for all users
+    async function fetchAllVisits() {
         try {
-            const visitsSnap = await getDocs(collection(db, 'users', userId, 'visits'));
-            visits = visitsSnap.docs.map(doc => ({
-                id: doc.id,
-                userId: userId, // Include userId in the visit object
-                timestamp: doc.data().timestamp.toDate(), // Convert Firestore timestamp to JavaScript Date
-                lat: doc.data().lat || null,              // Latitude (or null if not available)
-                lon: doc.data().lon || null               // Longitude (or null if not available)
-            }));
+            // Step 1: Fetch all users from the 'users' collection
+            const usersSnap = await getDocs(collection(db, 'users'));
+
+            let allVisits: Visit[] = [];
+
+            // Step 2: Loop through each user document
+            for (const userDoc of usersSnap.docs) {
+                const userId = userDoc.id;
+
+                // Step 3: Fetch visits for each user
+                const visitsSnap = await getDocs(collection(db, 'users', userId, 'visits'));
+
+                // Step 4: Extract visit data and push to allVisits array
+                visitsSnap.docs.forEach(visitDoc => {
+                    const data = visitDoc.data();
+                    allVisits.push({
+                        id: visitDoc.id,
+                        userId: userId, // Reference to user ID
+                        timestamp: data.timestamp.toDate(), // Convert Firestore timestamp to JS Date
+                        lat: data.lat || null, // Extract lat
+                        lon: data.lon || null  // Extract lon
+                    });
+                });
+            }
+
+            visits = allVisits; // Set the visits array
         } catch (error) {
             console.error('Error fetching visits:', error);
             errorMessage = 'Failed to fetch visits. Please try again later.'; // Set error message
         } finally {
-            loading = false; // Set loading to false after fetching is done
+            loading = false; // Set loading to false after fetching
         }
     }
 
     // Initialize map and fetch visits on component mount
     onMount(async () => {
-        const userId = localStorage.getItem('userId'); // Retrieve the userId from local storage
-        if (userId) {
-            await fetchVisits(userId);
-        } else {
-            loading = false; // If no userId is found, set loading to false
-            errorMessage = 'No user ID found.'; // Set error message
-        }
+        await fetchAllVisits(); // Fetch all visits for all users
 
         // Load Leaflet only in the browser
         if (typeof window !== 'undefined') {
@@ -62,34 +75,38 @@
 
     // Reactive statement to add markers to the map once visits are loaded
     $: if (!loading && visits.length > 0) {
-        import('leaflet').then(L => {
-            if (map) { // Ensure map is not null
-                // Create markers from visits and add them to the feature group
-                const markers = visits
-                    .filter(v => v.lat !== null && v.lon !== null) // Filter out visits with null coordinates
-                    .map(v => {
-                        const marker = L.marker([v.lat!, v.lon!]).addTo(map); // Create marker for each visit
-                        // Create a tooltip with userId and timestamp
-                        marker.bindTooltip(`
-                            <div class="tooltip-content">
-                                <strong>User ID:</strong> ${v.userId}<br>
-                                <strong>Date:</strong> ${v.timestamp.toLocaleDateString()} ${v.timestamp.toLocaleTimeString()}
-                            </div>
-                        `, { 
-                            permanent: false, 
-                            direction: 'right', 
-                            className: 'custom-tooltip' 
-                        });
-                        return marker; // Return the marker
+    import('leaflet').then(L => {
+        if (map !== null) { // Ensure map is not null before proceeding
+            // Create markers from visits and add them to the feature group
+            const markers = visits
+                .filter(v => v.lat !== null && v.lon !== null) // Filter out visits with null coordinates
+                .map(v => {
+                    const marker = L.marker([v.lat!, v.lon!]).addTo(map!); // 'map!' asserts that map is not null
+                    // Create a tooltip with userId and timestamp
+                    marker.bindTooltip(`
+                        <div class="tooltip-content">
+                            <strong>User ID:</strong> ${v.userId}<br>
+                            <strong>Date:</strong> ${v.timestamp.toLocaleDateString()} ${v.timestamp.toLocaleTimeString()}
+                        </div>
+                    `, { 
+                        permanent: false, 
+                        direction: 'right', 
+                        className: 'custom-tooltip' 
                     });
+                    return marker; // Return the marker
+                });
 
+            if (markers.length > 0) {
                 const group = L.featureGroup(markers); // Create a feature group from the markers
-                group.addTo(map); // Add the feature group to the map
+                group.addTo(map!); // Use map with the non-null assertion (!)
+
                 // Fit map bounds to the markers
-                map.fitBounds(group.getBounds());
+                map!.fitBounds(group.getBounds()); // 'map!' ensures it's not null
             }
-        });
-    }
+        }
+    });
+}
+
 </script>
 
 <style>
