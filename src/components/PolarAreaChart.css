@@ -1,0 +1,36 @@
+/* src/components/PolarAreaChart.css */
+@layer base {
+  .stats-container,
+  .glass-container {
+    @apply backdrop-filter: blur(5px) bg-white/70 rounded-lg shadow-md p-4;
+  }
+
+  .flex-container {
+    @apply flex flex-wrap justify-center items-stretch;
+  }
+
+  .chart-container, 
+  .legend-container {
+    @apply p-4 shadow-md rounded-lg;
+  }
+
+  .loading {
+    @apply text-center font-bold text-xl text-gray-500 p-4 rounded-lg bg-white/70;
+  }
+
+  .click-list {
+    @apply list-none p-0 font-medium text-base;
+  }
+
+  .click-item {
+    @apply flex justify-between items-center mb-2 px-3 py-2 rounded-lg bg-white/70 shadow-md;
+  }
+
+  .video-name {
+    @apply text-gray-800 font-semibold;
+  }
+
+  .click-count {
+    @apply text-gray-600 italic;
+  }
+}

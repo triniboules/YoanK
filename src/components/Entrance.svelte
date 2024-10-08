@@ -142,9 +142,9 @@
     }
 
     img {
-        max-width: 50%;
-        transition: transform 1.5s ease, filter 0.5s ease, box-shadow 0.5s ease;
-        transform: scale(1);
+        max-width: 100%;
+        transition: transform 3s ease, filter 2.5s ease, box-shadow 0.5s ease;
+        transform: scale(0.5);
         filter: grayscale(100%) contrast(120%);
         box-shadow: 0px 0px 50px rgba(0, 0, 0, 0.5);
         pointer-events: none; /* Prevent clicks on the image */
@@ -158,7 +158,7 @@
 </style>
 <div class="entrance-container {isTransitioningOut ? 'transitioning-out' : ''}">
     <div class="overlay"></div>
-    <button on:click={handleClick} aria-label="Yoann Kittery" in:fade={{ duration: 1500 }} tabindex="0">
+    <button on:click={handleClick} aria-label="Yoann Kittery" in:fade={{ duration: 2500 }} tabindex="0">
         <img src="/image/entrance.svg" alt="Yoann Kittery" />
     </button>
 </div>

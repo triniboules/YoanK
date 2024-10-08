@@ -19,4 +19,4 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // Export Firestore and other necessary functions for use in the app
-export { db, Timestamp, setDoc, doc, arrayUnion, getDoc, collection, getDocs };
+export { db, Timestamp, setDoc, doc, arrayUnion, getDoc, collection, getDocs, };

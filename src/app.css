@@ -1,4 +1,7 @@
 @import '@fontsource/fira-mono';
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 
 
 /* Global CSS */
@@ -135,33 +138,7 @@ button:focus:not(:focus-visible) {
   }
 }
 
-/* Header styling */
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1% 2%;
-  background: rgba(0, 0, 0, 0.29); /* Slightly transparent background */
-  position: relative;
-}
 
-.logo-left img {
-  height: 65px;
-}
-
-.logo-center {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.logo-center img {
-  height: 80px;
-}
-
-.contact-button img {
-  height: 30px; /* Adjust size as needed */
-}
 
 /* Video grid styles */
 .video-grid {
