@@ -211,7 +211,7 @@
         max-width: 60vw;
         margin: 0px auto; /* Added margin for spacing */
         padding: 10px;
-        background-color: white;
+        background-color: var(--background-color);
         border-radius: 12px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }

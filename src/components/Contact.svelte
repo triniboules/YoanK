@@ -9,8 +9,11 @@
     };
   
     // Text content in French and English
-    const frenchText: string = "Créateur de contenus vidéo pour artistes, mariages, entreprises, clips musicaux et tout type d'événements. Chaque projet est pour moi une occasion d'allier rigueur et créativité pour concrétiser vos idées avec précision. Je vous accompagne de la conceptualisation à la réalisation, afin de donner vie à vos projets avec professionnalisme.";
-    const englishText: string = "Video content creator for artists, weddings, businesses, music videos, and all types of events. Each project is an opportunity for me to combine rigor and creativity to bring your ideas to life with precision. I support you from conceptualization to realization, to bring your projects to life with professionalism.";
+    const frenchText: string = 
+      "Je suis créateur de contenus vidéo spécialisé dans les projets pour artistes, mariages, entreprises, clips musicaux et divers événements. Chaque projet est une occasion de marier rigueur et créativité, concrétisant vos idées avec précision. Je vous accompagne de la conceptualisation à la réalisation, assurant un service professionnel à chaque étape.";
+  
+    const englishText: string = 
+      "I am a video content creator specializing in projects for artists, weddings, businesses, music videos, and various events. Each project presents an opportunity to blend rigor and creativity, bringing your ideas to life with precision. I support you from conceptualization to realization, ensuring a professional service at every step.";
   </script>
   
   <div class="contact-modal">
@@ -32,192 +35,198 @@
           <button class="language-toggle" on:click={toggleLanguage} aria-label="Toggle language"></button>
         </div>
         <div class="contact-info">
-          <p><a href="mailto:yoannkittery@gmail.com">yoannkittery@gmail.com</a></p>
+          <p class="email">
+            <a href="mailto:yoannkittery@gmail.com">yoannkittery@gmail.com</a>
+          </p>
         </div>
       </div>
     </div>
   </div>
   
-  
   <style>
-  /* Modal background */
-  .contact-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.85); 
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-  }
+    /* Modal background */
+    .contact-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.85);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
   
-  /* Modal content container */
-  .contact-content {
-      position: relative;
-      background: transparent;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      width: 100%;
-      max-width: 500px;
-      padding: 20px;
-      box-sizing: border-box;
-  }
+    /* Modal content container */
+    .contact-content {
+        position: relative;
+        background: transparent;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        width: 100%;
+        max-width: 500px;
+        padding: 20px;
+        box-sizing: border-box;
+    }
   
-  /* Close button styles */
-  .close-btn {
-      position: absolute;
-      top: 6%;
-      right: 6%;
-      background: none;
-      border: none;
-      cursor: pointer;
-      z-index: 1001;
-  }
+    /* Close button styles */
+    .close-btn {
+        position: absolute;
+        top: 6%;
+        right: 10%;
+        background: none;
+        border: none;
+        cursor: pointer;
+        z-index: 1001;
+    }
   
-  .close-icon {
-      width: 24px;
-      height: 24px;
-      transition: opacity 0.3s ease; /* Smooth opacity transition */
-  }
+    .close-icon {
+        width: 24px;
+        height: 24px;
+        transition: opacity 0.3s ease; /* Smooth opacity transition */
+    }
   
-  .close-btn:hover .close-icon {
-      opacity: 0.6; /* Reduced opacity on hover */
-  }
+    .close-btn:hover .close-icon {
+        opacity: 0.6; /* Reduced opacity on hover */
+    }
   
-  /* Profile card container */
-  .profile-card {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background-color: #ffffff;
-      border-radius: 20px;
-      padding: 2rem;
-      max-width: 420px;
-      text-align: center;
-      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
-      transition: transform 0.4s ease-in-out, box-shadow 0.4s ease-in-out; /* Adjusted transition */
-  }
+    /* Profile card container */
+    .profile-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #ffffff;
+        border-radius: 20px;
+        padding: 2rem;
+        max-width: 420px;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
+        transition: transform 0.4s ease-in-out, box-shadow 0.4s ease-in-out; /* Adjusted transition */
+    }
   
-  /* Avatar flip effect */
-  .avatar-flip {
-      border-radius: 100px;
-      overflow: hidden;
-      height: 140px;
-      width: 140px;
-      position: relative;
-      margin: auto;
-      top: -70px;
-      box-shadow: 0 0 0 10px #ffffff;
-      transition: transform 0.6s ease-in-out; /* Smooth flip transition */
-  }
+    /* Avatar flip effect */
+    .avatar-flip {
+        border-radius: 100px;
+        overflow: hidden;
+        height: 140px;
+        width: 140px;
+        position: relative;
+        margin: auto;
+        top: -70px;
+        box-shadow: 0 0 0 10px #ffffff;
+        transition: transform 0.6s ease-in-out; /* Smooth flip transition */
+    }
   
-  .avatar-flip img {
-      position: absolute;
-      left: 0;
-      top: 0;
-      border-radius: 100px;
-      transition: opacity 0.6s ease-in-out; /* Match transition duration */
-      width: 140px;
-      height: 140px;
-  }
+    .avatar-flip img {
+        position: absolute;
+        left: 0;
+        top: 0;
+        border-radius: 100px;
+        transition: opacity 0.6s ease-in-out; /* Match transition duration */
+        width: 140px;
+        height: 140px;
+    }
   
-  .avatar-flip img:first-child {
-      z-index: 1;
-  }
+    .avatar-flip img:first-child {
+        z-index: 1;
+    }
   
-  .avatar-flip img:last-child {
-      z-index: 0;
-      transform: rotateY(180deg);
-      opacity: 0;
-  }
+    .avatar-flip img:last-child {
+        z-index: 0;
+        transform: rotateY(180deg);
+        opacity: 0;
+    }
   
-  /* Avatar flip on hover */
-  .contact-content:hover .avatar-flip {
-      transform: rotateY(180deg);
-  }
+    /* Avatar flip on hover */
+    .contact-content:hover .avatar-flip {
+        transform: rotateY(180deg);
+    }
   
-  .contact-content:hover .avatar-flip img:first-child {
-      opacity: 0;
-  }
+    .contact-content:hover .avatar-flip img:first-child {
+        opacity: 0;
+    }
   
-  .contact-content:hover .avatar-flip img:last-child {
-      opacity: 1;
-  }
+    .contact-content:hover .avatar-flip img:last-child {
+        opacity: 1;
+    }
   
-  /* Header styling */
-  h2 {
-      font-size: 2.25rem;
-      font-weight: 700;
-      color: #222;
-      margin-top: -50px;
-      margin-bottom: 1rem;
-  }
+    /* Header styling */
+    h2 {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: #222;
+        margin-top: -50px;
+        margin-bottom: 1rem;
+    }
   
-  /* Glass effect only for the main text */
+    /* Justified text */
+    .justified-text {
+        text-indent: 1.5rem;
+        margin-top: 10px;
+        margin-bottom: 20px; /* Added gap between text and email */
+        font-size: 1.125rem;
+        color: #272727;
+        line-height: 1.2;
+        text-align: justify; /* Justifies the text */
+    }
   
-  /* Justified text */
-  .justified-text {
-    text-indent: 1.5rem;
-    margin-top: 10px;
-    font-size: 1.125rem;
-    color: #272727;
-    line-height: 1.2;
-  }
+    /* Contact info styling */
+    .contact-info {
+        margin-bottom: -8%;
+        font-size: 1rem;
+        color: #555;
+        z-index: 1001;
+    }
   
-  /* Contact info styling */
-  .contact-info {
-      margin-bottom: -8%;
-      font-size: 1rem;
-      color: #555;
-      z-index: 1001;
-  }
+    .email {
+        font-size: 1.25rem; /* Increased email font size */
+        color: #007bff; /* Change color for visibility */
+    }
   
-  .contact-info a {
-      color: #007bff;
-      text-decoration: none;
-      z-index: 1001;
-  }
+    .contact-info a {
+        color: inherit; /* Inherit color from the .email class */
+        text-decoration: none;
+        z-index: 1001;
+    }
   
-  .contact-info a:hover {
-      text-decoration: underline;
-  }
+    .contact-info a:hover {
+        text-decoration: underline;
+    }
   
-  /* System font stack */
-  p, h2, a {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  }
+    /* System font stack */
+    p, h2, a {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
   
-  /* Invisible button */
-  .language-toggle {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      z-index: 1000;
-  }
+    /* Invisible button */
+    .language-toggle {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        z-index: 1000;
+    }
   
-  /* Media query for screens less than 1000px wide */
-  @media (max-width: 1000px) {
-      .contact-content {
-          width: 75%;
-      }
-  }
+    /* Media query for screens less than 1000px wide */
+    @media (max-width: 1000px) {
+        .contact-content {
+            width: 75%;
+        }
+    }
   
-  /* Media query for screens less than 800px wide */
-  @media (max-width: 800px) {
-      .contact-content {
-          width: 100%;
-      }
-  }
+    /* Media query for screens less than 800px wide */
+    @media (max-width: 800px) {
+        .contact-content {
+            width: 100%;
+        }
+    }
   </style>
   

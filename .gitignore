@@ -22,3 +22,5 @@ src/FIREBASE.env
 # Vite configuration files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+*storybook.log

@@ -69,10 +69,11 @@
                         storeVisit(lat, lon),
                         storeClickCount()
                     ]);
-
+                    
                     onAccess();  // Call the external function to continue the workflow
-                }, (error) => {
+                }, async (error) => {
                     console.error("Geolocation error:", error);
+                    // Proceed without location
                     onAccess(); // Call onAccess even if geolocation fails
                 });
             } else {
@@ -82,9 +83,6 @@
         }
     };
 </script>
-
-
-
 
 <style>
     .entrance-container {
@@ -156,6 +154,7 @@
         transform: scale(1.1); /* Slightly enlarged during fade-out */
     }
 </style>
+
 <div class="entrance-container {isTransitioningOut ? 'transitioning-out' : ''}">
     <div class="overlay"></div>
     <button on:click={handleClick} aria-label="Yoann Kittery" in:fade={{ duration: 2500 }} tabindex="0">

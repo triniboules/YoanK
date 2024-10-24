@@ -175,8 +175,8 @@
     max-width: 85vw;
     margin: auto;
     padding: 20px;
-    backdrop-filter: blur(10px);
-    background-color: #f9fafb34;
+    
+    background-color: rgba(161, 161, 161, 0.336);
     border-radius: 8px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     font-family: 'Arial', sans-serif;

@@ -2,6 +2,7 @@
   import { v4 as uuidv4 } from 'uuid';
   import Contact from '../components/Contact.svelte';
   import { db, Timestamp, setDoc, doc, arrayUnion } from '../components/firebase';
+  import Background from '../components/Background.svelte';
 
   let showContact = false;
   const hasLocalStorage = typeof localStorage !== 'undefined';
@@ -47,6 +48,7 @@
   };
 </script>
 
+
 <header class="header">
   <div class="logo-left">
       <button class="logo-button" on:click={handleLeftLogoClick} aria-label="Open Contact">
@@ -70,43 +72,59 @@
 {/if}
 
 <style>
-  .header {
-    display: flex;
-    justify-content: space-between; /* Distributes space between items */
-    align-items: center;
-    padding: 0px 3%;
-    background: rgba(0, 0, 0, 0.29);
-    height: 68px;
-    position: relative;
-  }
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0px 3%;
+  background: rgba(0, 0, 0, 0.29);
+  height: 68px;
+  position: relative;
+  z-index: 1;
+}
 
-  .logo-left .logo-button,
-  .logo-center-button,
-  .contact-button {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
+.logo-left {
+  flex: 1; /* Takes equal space on both sides */
+}
+
+.logo-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%); /* Ensures the logo stays centered */
+}
+
+.logo-button,
+.logo-center-button,
+.contact-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.contact-button img {
+  height: 30px;
+}
+
+.logo-left img,
+.logo-center img {
+  height: 60px;
+}
+
+@media (max-width: 1200px) {
+  .logo-center {
+    display: none; /* Hides center logo on smaller screens */
   }
-  
-  .logo-left img,
-  .logo-center img,
-  .contact-button img {
-    height: 60px;
+}
+
+@media (max-width: 800px) {
+  .contact, 
+  .logo-center {
+    display: none; /* Hides contact and center logo on small screens */
   }
-  
-  @media (max-width: 1200px) {
-    .logo-center {
-      display: none;
-    }
+  .header {
+    justify-content: space-around; /* Re-distribute items on small screens */
   }
-  
-  @media (max-width: 800px) {
-    .contact, .logo-center {
-      display: none;
-    }
-    .header {
-      justify-content: space-around; /* Ensures items are evenly spaced on small screens */
-    }
-  }
+}
+
 </style>

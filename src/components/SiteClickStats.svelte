@@ -158,7 +158,7 @@
     margin: auto;
     padding: 20px;
     backdrop-filter: blur(10px);
-    background-color: #f9fafb34; /* Semi-transparent background */
+    background-color: #f9fafbe3; /* Semi-transparent background */
     border-radius: 8px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     font-family: 'Arial', sans-serif;

@@ -26,5 +26,5 @@
 </style>
 
 <footer>
-  <p>Crafted by <a href="mailto:ksylvestre1@hotmail.com">Sylvestre</a> &copy; {new Date().getFullYear()}</p>
+  <p><a href="mailto:ksylvestre1@hotmail.com">Crafted by Sylvestre &copy; {new Date().getFullYear()}</a></p>
 </footer>

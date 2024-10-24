@@ -3,46 +3,21 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-
 /* Global CSS */
-:root {
-  --font-body: Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
-    Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  --font-mono: 'Fira Mono', monospace;
-  --color-bg-0: rgb(202, 216, 228);
-  --color-bg-1: rgb(0, 0, 0); /* Background color */
-  --color-bg-2: hsl(224, 44%, 95%);
-  --color-theme-1: #ff3e00;
-  --color-theme-2: #4075a6;
-  --color-text: rgba(255, 255, 255, 0.7); /* Text color */
-  --padding: 1rem; /* General padding variable */
-  font-family: var(--font-body);
-  color: var(--color-text);
-}
+
 
 /* Ensure html and body take full width and height */
 html, body {
-  height: 100%;
+  height: 100%; /* Maintain full height */
   margin: 0;
   padding: 0;
   width: 100%;
   background-color: var(--color-bg-1); /* Black background */
 }
 
-/* Body flex container to handle the layout */
+/* Remove body flex layout */
 body {
-  display: flex;
-  flex-direction: column;
   min-height: 100vh; /* Ensure body takes up full viewport height */
-}
-
-/* Main content area */
-main {
-  flex: 1; /* Take up all available space except footer */
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  margin: 0; /* Ensure no margin to avoid extra space */
 }
 
 /* Footer styling */
@@ -68,11 +43,6 @@ footer a {
 
 footer a:hover {
   text-decoration: underline;
-}
-
-/* Container padding */
-.container {
-  padding: var(--padding);
 }
 
 /* Style for headers and paragraphs */
@@ -116,7 +86,7 @@ pre {
 /* Layout and responsive design */
 .text-column {
   display: flex;
-  max-width: 48rem;
+ 
   flex: 0.6;
   flex-direction: column;
   justify-content: center;
@@ -138,25 +108,24 @@ button:focus:not(:focus-visible) {
   }
 }
 
+/* Other styles remain unchanged */
+
+
 
 
 /* Video grid styles */
-.video-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr); /* Default: 3 columns */
-  width: 100%;
-  padding-bottom: 0;
-  box-sizing: border-box;
-}
+
+
 
 .video-item {
+  
   position: relative;
   cursor: pointer;
   overflow: hidden;
   border: none;
   background: none;
   aspect-ratio: 2.39 / 1; /* Aspect ratio for thumbnails */
-  width: 100%;
+  
 }
 
 .thumbnail {

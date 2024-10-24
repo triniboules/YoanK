@@ -1,9 +1,10 @@
 <script lang="ts">
-    import { db, doc, getDoc } from '../../components/firebase'; // Adjust the path based on your structure
+    import { db, doc, getDoc } from '../../components/firebase';
     import VideoManager from '../../components/VideoManager.svelte';
-    import GlobalUser from '../../components/AnalyticsDashboard.svelte';
+    import GlobalUser from '../../components/GlobalUser.svelte';
     import PolarAreaChart from '../../components/PolarAreaChart.svelte';
     import SiteClickStats from '../../components/SiteClickStats.svelte';
+    import Background from '../../components/Background.svelte';
 
     let activeComponent: string | null = null;
     let showWelcome = true;
@@ -21,6 +22,7 @@
                 if (passwordInput === storedPassword) {
                     userAuthenticated = true;
                     showLoginError = false; // Hide error if password is correct
+                    showWelcome = false; // Hide the welcome message after successful login
                 } else {
                     showLoginError = true; // Show error if password is wrong
                 }
@@ -33,223 +35,144 @@
         }
     };
 
-    const showComponent = (component: string) => {
-        if (userAuthenticated) {
-            activeComponent = component;
-            showWelcome = false;
-        } else {
-            showLoginError = true;
-        }
-    };
-
     // Handle the form submission
     const handleSubmit = () => {
         verifyPassword(); // Verify the password when the user submits the form
     };
-</script>
 
+    // Allow users to show the selected component only after authentication
+    const showComponent = (component: string) => {
+        if (userAuthenticated) {
+            activeComponent = component;
+        } else {
+            showLoginError = true; // Notify the user they need to log in
+        }
+    };
+</script>
+<Background />
 <style>
-    /* Color Variables */
+    /* Local Styles */
     :root {
         --primary-color: #007BFF; 
         --success-color: #28a745; 
         --error-color: #dc3545; 
-        --background-color: #f0f0f0; /* Lighter background */
         --text-color: #333333; 
-        --highlight-color: #ffcc00; 
-        --button-background: #007BFF; 
-        --button-hover-background: #0056b3; 
-        --button-text-color: #ffffff; 
+        --overlay-background: rgba(255, 255, 255, 0); /* Transparent overlay for better visibility */
     }
 
-
-
     .background {
-        background-color: var(--background-color);
         min-height: 100vh;
-        display: flex;
-        flex-direction: column; /* Stack elements vertically */
-        justify-content: flex-start; /* Align items to the start */
-        align-items: center; 
         padding: 20px; 
+        margin-top: 70px; /* Leave space for the header */
+        display: flex;
+        flex-direction: column; 
+        align-items: center; /* Center align items */
+        position: relative; /* Position relative to place other elements */
+        background-color: var(--overlay-background); /* Use the overlay background */
     }
 
     .glass-container {
         backdrop-filter: blur(10px); 
         border-radius: 12px; 
-        width: 80vw; 
+        width: calc(66.67vh * 0.9); /* Maintain proportion */
         margin-bottom: 20px; 
         padding: 30px; 
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); 
         display: flex; 
         flex-direction: column; 
         align-items: center; 
+        position: relative; /* Relative to overlap background */
+        z-index: 1; /* Ensure it appears above the background */
+        background-color: rgba(255, 255, 255, 0.911); /* Semi-transparent background for glass effect */
     }
 
     .header {
-        display: flex; 
-        flex-direction: row; 
-        gap: 20px; 
-        width: 100%; 
-        justify-content: center; 
-        margin-bottom: 20px; /* Space below the header */
-    }
-
-    .button {
-    background: linear-gradient(135deg, #007BFF, #0056b3); /* Gradient background for depth */
-    border: none;
-    border-radius: 50px; /* Rounded edges for a modern look */
-    padding: 12px 30px; /* Adjusted padding for balance */
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth transitions */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 18px; /* Slightly smaller font size */
-    color: white; /* White text for contrast */
-    font-weight: bold;
-    text-transform: uppercase; /* Uppercase for emphasis */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Smaller, softer shadow */
-    position: relative;
-    overflow: hidden;
-}
-
-.button:hover {
-    background: linear-gradient(135deg, #0056b3, #003f88); /* Darker gradient on hover */
-    transform: translateY(-2px); /* Slight lift effect */
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Enhanced shadow on hover */
-}
-
-.button:active {
-    transform: translateY(0); /* Reset on active */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Reduced shadow on click */
-}
-
-.button::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 300%;
-    height: 300%;
-    background: rgba(255, 255, 255, 0.15); /* Light overlay */
-    transition: all 0.75s ease;
-    border-radius: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    z-index: 0; /* Behind button text */
-}
-
-.button:hover::before {
-    transform: translate(-50%, -50%) scale(1); /* Scale effect on hover */
-}
-
-.button span {
-    position: relative;
-    z-index: 1; /* Bring text above overlay */
-}
-
-
-
-
-
-    .component-container {
-
-        display: flex;
-    }
-
-    .welcome-screen {
-        display: flex; 
-        flex-direction: column; 
-        justify-content: center; 
-        align-items: center; 
-        height: 80vh; 
-        width: 100%; 
-        max-width: 600px; 
-        margin: 0 auto; 
-    }
-
-    .button-grid {
-        display: grid; 
-        grid-template-columns: repeat(2, 1fr); 
-        gap: 20px; 
-        width: 100%; 
-        max-width: 90vw; 
-        margin: 0 auto; 
-        justify-items: center; 
-    }
-
-    h2 {
-        color: var(--text-color); 
         font-size: 2rem; 
-        margin-bottom: 24px; 
-        text-align: center; 
+        margin-bottom: 20px;
+        text-align: justify; 
+        color: var(--text-color);
+    }
+
+    .error-message {
+        color: var(--error-color); 
     }
 
     input {
         width: 100%; 
         padding: 10px; 
-        margin: 10px 0; 
+        margin: 5px 0; 
         border: 1px solid #ccc; 
         border-radius: 5px; 
     }
 
-    .error-message {
-        color: var(--error-color); 
-        margin-top: 10px; 
+    .button-grid {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-evenly; 
+        align-items: center;
+        width: 100%;
+        height: 70px; 
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        gap: 10px;
+        background: rgba(255, 255, 255, 0); 
+       
+        border-bottom: 1px solid #ccc; 
+        z-index: 1000; 
+    }
+
+    .button {
+        background: linear-gradient(135deg, #007BFF, #0056b3); 
+        border: none;
+        border-radius: 10px; 
+        padding: 12px 15px; 
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease; 
+        font-size: 16px; 
+        color: white; 
+        font-weight: bold;
+        text-transform: uppercase; 
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+        position: relative;
+        overflow: hidden;
+    }
+
+    .button:hover {
+        background: linear-gradient(135deg, #0056b3, #003f88); 
+        transform: translateY(-2px); 
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); 
     }
 </style>
 
+
+<div class="button-grid glass-container">
+    {#if userAuthenticated}
+        <button class="button" on:click={() => showComponent('VideoManager')}>Video Manager</button>
+        <button class="button" on:click={() => showComponent('GlobalUser')}>Global User</button>
+        <button class="button" on:click={() => showComponent('PolarAreaChart')}>Polar Area Chart</button>
+        <button class="button" on:click={() => showComponent('SiteClickStats')}>Site Click Stats</button>
+    {/if}
+</div>
+
+
 <div class="background">
-    <!-- Access Denied message -->
-    {#if showLoginError}
+    {#if showLoginError || !userAuthenticated}
         <div class="glass-container">
-            <h2 class="error-message">Access Denied. Incorrect username or password.</h2>
+            {#if showLoginError}
+                <h2 class="error-message">Access Denied. Please log in to access components.</h2>
+            {/if}
+            {#if !userAuthenticated}
+                <h2 class="header">Enter Your Credentials</h2>
+                <input type="text" bind:value={usernameInput} placeholder="Username" />
+                <input type="password" bind:value={passwordInput} placeholder="Password" />
+                <button class="button" on:click={handleSubmit}>Submit</button>
+            {/if}
         </div>
     {/if}
 
-    <!-- Login form -->
-    {#if !userAuthenticated}
-        <div class="glass-container">
-            <h2>Enter Your Credentials</h2>
-            <input
-                type="text"
-                bind:value={usernameInput}
-                placeholder="Enter username"
-            />
-            <input
-                type="password"
-                bind:value={passwordInput}
-                placeholder="Enter password"
-            />
-            <button class="button" on:click={handleSubmit}>Submit</button>
-        </div>
-    {/if}
-
-    <!-- Welcome Screen -->
-    {#if showWelcome && userAuthenticated}
-        <div class="welcome-screen">
-            <h2>Welcome! Choose a Component</h2>
-            <div class="button-grid glass-container">
-                <button class="button" on:click={() => showComponent('VideoManager')}>Video Manager</button>
-                <button class="button" on:click={() => showComponent('GlobalUser')}>Global User</button>
-                <button class="button" on:click={() => showComponent('PolarAreaChart')}>Analytics Dashboard</button>
-                <button class="button" on:click={() => showComponent('SiteClickStats')}>Site Click Stats</button>
-            </div>
-        </div>
-    {/if}
-
-    <!-- Header with buttons when a component is active -->
-    {#if !showWelcome && userAuthenticated}
-        <div class="header">
-            <button class="button" on:click={() => showComponent('VideoManager')}>Video Manager</button>
-            <button class="button" on:click={() => showComponent('GlobalUser')}>Global User</button>
-            <button class="button" on:click={() => showComponent('PolarAreaChart')}>Analytics Dashboard</button>
-            <button class="button" on:click={() => showComponent('SiteClickStats')}>Site Click Stats</button>
-        </div>
-    {/if}
-
-    <!-- Active Component Display -->
-    <div class="component-container">
+    <!-- Dynamic Component Rendering -->
+    {#if userAuthenticated && activeComponent}
         {#if activeComponent === 'VideoManager'}
             <VideoManager />
         {:else if activeComponent === 'GlobalUser'}
@@ -259,5 +182,5 @@
         {:else if activeComponent === 'SiteClickStats'}
             <SiteClickStats />
         {/if}
-    </div>
+    {/if}
 </div>

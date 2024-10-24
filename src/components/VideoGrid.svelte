@@ -105,13 +105,16 @@
   @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&display=swap');
 
   .video-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 5px 0px;
-    width: 99%;
-    box-sizing: border-box;
-    justify-content: center;
-  }
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 columns */
+  gap: 5px; /* Equal 2px gap between columns and rows */
+  justify-content: center; /* Horizontally centers the grid */
+  align-content: center; /* Vertically centers the grid */
+  width: 99vw;
+  padding: 0px;
+  box-sizing: border-box;
+}
+
 
   .video-item {
     position: relative;
@@ -121,6 +124,7 @@
     background: none;
     aspect-ratio: 2.39 / 1;
     width: 100%;
+    transition: transform 0.5s ease; /* Smooth growth effect */
   }
 
   .thumbnail-wrapper {
@@ -138,7 +142,7 @@
     max-height: 100%;
     object-fit: cover;
     transition: opacity 0.3s ease;
-    opacity: 0;
+    opacity: 1;
   }
 
   .logo {
@@ -153,7 +157,7 @@
   }
 
   .small-logo {
-    transform: scale(0.5);
+    transform: scale(0.7);
     position: absolute;
     top: -0%;
     left: -0%;
@@ -172,9 +176,14 @@
     display: none;
     width: 100%;
   }
+  .video-item:hover {
+    display: block;
+    transform: scale(1.01); /* Slightly increases size by 2% */
+  }
 
   .video-item:hover .overlay {
     display: block;
+    
   }
 
   .video-item:hover .logo {
