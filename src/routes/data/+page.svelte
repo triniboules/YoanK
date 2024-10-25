@@ -1,14 +1,15 @@
 <script lang="ts">
     import { db, doc, getDoc } from '../../components/firebase';
     import VideoManager from '../../components/VideoManager.svelte';
-    import GlobalUser from '../../components/GlobalUser.svelte';
+
+    import GlobalUser from '../../components/Globaluser.svelte';
     import PolarAreaChart from '../../components/PolarAreaChart.svelte';
     import SiteClickStats from '../../components/SiteClickStats.svelte';
     import Background from '../../components/Background.svelte';
 
     let activeComponent: string | null = null;
     let showWelcome = true;
-    let userAuthenticated = false; // Track if the user is authenticated
+    let userAuthenticated = false; 
     let showLoginError = false; // Display login error if password is wrong
     let usernameInput = ''; // Store the username the user types
     let passwordInput = ''; // Store the password the user types
