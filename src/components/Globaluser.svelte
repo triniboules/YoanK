@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import { db } from './firebase.js'; 
     import { collection, getDocs } from 'firebase/firestore';
-    import Background from './Background.svelte'; // Import the Background component
+   
 
     interface Visit {
         id: string;           
