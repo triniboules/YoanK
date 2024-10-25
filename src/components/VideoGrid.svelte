@@ -111,7 +111,7 @@
   justify-content: center; /* Horizontally centers the grid */
   align-content: center; /* Vertically centers the grid */
   width: 99vw;
-  padding: 0px;
+  padding: 5px;
   box-sizing: border-box;
 }
 
