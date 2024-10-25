@@ -110,8 +110,8 @@
   gap: 5px; /* Equal 2px gap between columns and rows */
   justify-content: center; /* Horizontally centers the grid */
   align-content: center; /* Vertically centers the grid */
-  width: 99vw;
-  padding: 5px;
+  width: 98vw;
+  padding: 0px;
   box-sizing: border-box;
 }
 
