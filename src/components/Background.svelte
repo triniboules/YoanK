@@ -2,56 +2,53 @@
     import { onMount } from 'svelte';
 
     interface Star {
-        left: number; // X position in vw
-        top: number; // Y position in vh
-        size: string; // Size in px
-        animationDuration: string; // Animation duration
-        translateX: string; // X-axis movement
-        translateY: string; // Y-axis movement
-        opacity: string; // Opacity for depth effect
+        left: number;
+        top: number;
+        size: string;
+        animationDuration: string;
+        translateX: string;
+        translateY: string;
+        opacity: string;
     }
 
     let baseStarsPerLayer: number[] = [];
     let speedFactors: number[] = [];
-    let sizeRanges: [number, number][] = [];
+    let sizeRanges: [number, number][] = [
+        [0.5, 1.5],
+        [1, 2],
+        [1.5, 3],
+        [0.5, 1],
+        [0.5, 1.5],
+        [0.5, 2],
+        [1, 3]
+    ];
 
     function calculateStarParameters() {
-        // Base dimensions for a default size (e.g., 1920x1080)
         const baseWidth = 1920;
         const baseHeight = 1080;
 
-        // Get the current viewport size
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
+        const parentWidth = window.innerWidth;
+        const parentHeight = window.innerHeight;
 
-        // Calculate scaling factors based on the viewport size
-        const widthFactor = vw / baseWidth;
-        const heightFactor = vh / baseHeight;
+        const widthFactor = parentWidth / baseWidth;
+        const heightFactor = parentHeight / baseHeight;
         const minFactor = Math.min(widthFactor, heightFactor);
 
-        // Adjust parameters based on the smallest scaling factor
         baseStarsPerLayer = baseStarsPerLayer.map(count => Math.round(count * minFactor));
         speedFactors = [1, 1.5, 2, 0.5, 2.5, 3, 0].map(factor => factor * minFactor);
-        sizeRanges = [
-            [0.5 * minFactor, 1.5 * minFactor],
-            [1 * minFactor, 2 * minFactor],
-            [1.5 * minFactor, 3 * minFactor],
-            [0.5 * minFactor, 1 * minFactor],
-            [0.5 * minFactor, 1.5 * minFactor],
-            [0.5 * minFactor, 2 * minFactor],
-            [1 * minFactor, 3 * minFactor]
-        ];
+
+        // Ensure `sizeRanges` meets `[number, number]` typing for each element
+        sizeRanges = sizeRanges.map(([min, max]): [number, number] => [min * minFactor, max * minFactor]);
     }
 
     function generateStars(count: number, speedFactor: number, sizeRange: [number, number], opacityRange: [number, number]): Star[] {
         const stars: Star[] = [];
         for (let i = 0; i < count; i++) {
-            const left = Math.random() * 100; // Position in percentage
+            const left = Math.random() * 100;
             const top = Math.random() * 100;
 
-            // Calculate the direction based on the center (50, 50)
-            const directionX = (left - 50) * speedFactor; // Outward direction
-            const directionY = (top - 50) * speedFactor; // Outward direction
+            const directionX = (left - 50) * speedFactor;
+            const directionY = (top - 50) * speedFactor;
 
             const initialSize = Math.random() * (sizeRange[1] - sizeRange[0]) + sizeRange[0];
 
@@ -71,43 +68,39 @@
     let layers: Star[][] = [];
 
     onMount(() => {
-        // Set initial base values
         baseStarsPerLayer = [100, 50, 30, 70, 20, 10, 5];
-
-        // Calculate star parameters based on the viewport size
         calculateStarParameters();
 
-        // Generate the star layers
         layers = baseStarsPerLayer.map((count, index) => {
-            return generateStars(count, speedFactors[index], sizeRanges[index], [0.5, 1]); // Use a fixed opacity range
+            return generateStars(count, speedFactors[index], sizeRanges[index], [0.5, 1]);
         });
     });
 </script>
 
 <style>
     .bg {
-        background-color: black; /* Solid black background */
-        height: 100%; /* Use parent's height */
-        width: 100%; /* Use parent's width */
-        position: absolute; /* Position absolute to fit parent */
+        background-color: black;
+        height: 100%;
+        width: 100%;
+        position: absolute;
         top: 0;
         left: 0;
-        display: flex; /* Flexbox to align stars */
-        flex-wrap: wrap; /* Allow stars to wrap */
-        justify-content: center; /* Center the stars */
-        align-items: center; /* Center the stars vertically */
-        gap: 10px; /* 10px gap between stars */
-        overflow: hidden; /* Prevent overflow */
-        z-index: -1; /* Behind everything */
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        overflow: hidden;
+        z-index: -1;
     }
 
     .star {
         border-radius: 50%;
-        background: white; /* White stars */
+        background: white;
         position: absolute;
         opacity: var(--star-opacity);
-        animation: fly-by linear infinite; /* Apply animation */
-        transform-origin: center; /* For scaling effect */
+        animation: fly-by linear infinite;
+        transform-origin: center;
     }
 
     @keyframes fly-by {

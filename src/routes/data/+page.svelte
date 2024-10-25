@@ -5,7 +5,7 @@
     import GlobalUser from '../../components/Globaluser.svelte';
     import PolarAreaChart from '../../components/PolarAreaChart.svelte';
     import SiteClickStats from '../../components/SiteClickStats.svelte';
-    import Background from '../../components/Background.svelte';
+    import Background from '../../components/Background2.svelte';
 
     let activeComponent: string | null = null;
     let showWelcome = true;

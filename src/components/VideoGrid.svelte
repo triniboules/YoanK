@@ -105,16 +105,17 @@
   @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&display=swap');
 
   .video-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3 columns */
-  gap: 5px; /* Equal 2px gap between columns and rows */
-  justify-content: center; /* Horizontally centers the grid */
-  align-content: center; /* Vertically centers the grid */
-  width: 98vw;
-  padding: 0px;
-  box-sizing: border-box;
-}
-
+    padding-top: 15px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(250px, 1fr));
+    gap: 5px;
+    justify-content: center;
+    align-content: center;
+    width: 100%;
+    max-width: 100vw;
+    padding-inline: 10px;
+    box-sizing: border-box;
+  }
 
   .video-item {
     position: relative;
@@ -123,8 +124,7 @@
     border: none;
     background: none;
     aspect-ratio: 2.39 / 1;
-    width: 100%;
-    transition: transform 0.5s ease; /* Smooth growth effect */
+    transition: transform 0.5s ease;
   }
 
   .thumbnail-wrapper {
@@ -159,8 +159,8 @@
   .small-logo {
     transform: scale(0.7);
     position: absolute;
-    top: -0%;
-    left: -0%;
+    top: 10px;
+    left: 10px;
     z-index: 1;
     opacity: 0;
     transition: opacity 0.5s ease, transform 0.5s ease;
@@ -176,14 +176,15 @@
     display: none;
     width: 100%;
   }
+
   .video-item:hover {
-    display: block;
-    transform: scale(1.01); /* Slightly increases size by 2% */
+    transform: scale(1.01);
   }
 
   .video-item:hover .overlay {
-    display: block;
-    
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .video-item:hover .logo {
@@ -205,7 +206,7 @@
 
   @media (max-width: 1200px) {
     .video-grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(250px, 1fr));
     }
   }
 
@@ -215,3 +216,4 @@
     }
   }
 </style>
+
