@@ -83,10 +83,7 @@
 <style>
     .visits-container {
         background-color: #f9f9f957;
-        padding: 20px;
-        border-radius: 8px;
-        max-width: 100%;
-        margin: 20px auto;
+        display: flex;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
@@ -114,16 +111,17 @@
     }
 
     .visit-item {
+        display: flex;
         background: white;
         border: 1px solid #ccc;
-        padding: 15px;
+      
         margin-bottom: 10px;
         border-radius: 4px;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
     }
 
     .visit-item div {
-        margin-bottom: 5px;
+        
         color: #333;
     }
 

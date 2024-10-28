@@ -1,55 +1,52 @@
 <script lang="ts">
     import { db, doc, getDoc } from '../../components/firebase';
     import VideoManager from '../../components/VideoManager.svelte';
-
     import GlobalUser from '../../components/Globaluser.svelte';
     import PolarAreaChart from '../../components/PolarAreaChart.svelte';
     import SiteClickStats from '../../components/SiteClickStats.svelte';
-    import Background from '../../components/Background2.svelte';
+    import Background from '../../components/Background.svelte';
 
     let activeComponent: string | null = null;
     let showWelcome = true;
     let userAuthenticated = false; 
-    let showLoginError = false; // Display login error if password is wrong
-    let usernameInput = ''; // Store the username the user types
-    let passwordInput = ''; // Store the password the user types
+    let showLoginError = false; 
+    let usernameInput = '';
+    let passwordInput = '';
 
-    // Fetch the password from Firestore and verify it
     const verifyPassword = async () => {
         try {
-            const userDoc = await getDoc(doc(db, 'users', 'Triniboules')); // Get the user document
+            const userDoc = await getDoc(doc(db, 'users', 'Triniboules'));
             if (userDoc.exists()) {
-                const storedPassword = userDoc.data()?.password; // Get the password from user document
+                const storedPassword = userDoc.data()?.password;
                 if (passwordInput === storedPassword) {
                     userAuthenticated = true;
-                    showLoginError = false; // Hide error if password is correct
-                    showWelcome = false; // Hide the welcome message after successful login
+                    showLoginError = false;
+                    showWelcome = false;
                 } else {
-                    showLoginError = true; // Show error if password is wrong
+                    showLoginError = true;
                 }
             } else {
-                showLoginError = true; // Show error if the user doesn't exist
+                showLoginError = true;
             }
         } catch (error) {
             console.error("Error fetching data from Firestore:", error);
-            showLoginError = true; // Handle fetch error
+            showLoginError = true; 
         }
     };
 
-    // Handle the form submission
     const handleSubmit = () => {
-        verifyPassword(); // Verify the password when the user submits the form
+        verifyPassword();
     };
 
-    // Allow users to show the selected component only after authentication
     const showComponent = (component: string) => {
         if (userAuthenticated) {
             activeComponent = component;
         } else {
-            showLoginError = true; // Notify the user they need to log in
+            showLoginError = true; 
         }
     };
 </script>
+
 <Background />
 <style>
     /* Local Styles */
@@ -58,38 +55,37 @@
         --success-color: #28a745; 
         --error-color: #dc3545; 
         --text-color: #333333; 
-        --overlay-background: rgba(255, 255, 255, 0); /* Transparent overlay for better visibility */
+        --overlay-background: rgba(255, 255, 255, 0); 
     }
 
     .background {
-        min-height: 100vh;
+        
         padding: 20px; 
-        margin-top: 70px; /* Leave space for the header */
+        
         display: flex;
         flex-direction: column; 
-        align-items: center; /* Center align items */
-        position: relative; /* Position relative to place other elements */
-        background-color: var(--overlay-background); /* Use the overlay background */
+        align-items: center; 
+        position: relative; 
+        background-color: var(--overlay-background); 
+        overflow: hidden; /* Added to hide overflowing content */
     }
 
     .glass-container {
         backdrop-filter: blur(10px); 
         border-radius: 12px; 
-        width: calc(66.67vh * 0.9); /* Maintain proportion */
-        margin-bottom: 20px; 
-        padding: 30px; 
+     
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); 
         display: flex; 
         flex-direction: column; 
         align-items: center; 
-        position: relative; /* Relative to overlap background */
-        z-index: 1; /* Ensure it appears above the background */
-        background-color: rgba(255, 255, 255, 0.911); /* Semi-transparent background for glass effect */
+        position: relative; 
+        z-index: 1; 
+        background-color: rgba(255, 255, 255, 0.911); 
     }
 
     .header {
         font-size: 2rem; 
-        margin-bottom: 20px;
+       
         text-align: justify; 
         color: var(--text-color);
     }
@@ -111,26 +107,25 @@
         flex-direction: row;
         justify-content: space-evenly; 
         align-items: center;
-        width: 100%;
+        width: 80%;
         height: 70px; 
-        position: fixed; 
+        position: relative; 
         top: 0; 
-        left: 0; 
+        left: 10%; 
         gap: 10px;
         background: rgba(255, 255, 255, 0); 
-       
         border-bottom: 1px solid #ccc; 
         z-index: 1000; 
     }
 
     .button {
-        background: linear-gradient(135deg, #007BFF, #0056b3); 
+        background: linear-gradient(135deg, #6e94bd54, #4890dda8); 
         border: none;
         border-radius: 10px; 
         padding: 12px 15px; 
         cursor: pointer;
         transition: transform 0.2s ease, box-shadow 0.2s ease; 
-        font-size: 16px; 
+        font-size: 1rem; 
         color: white; 
         font-weight: bold;
         text-transform: uppercase; 
@@ -138,14 +133,17 @@
         position: relative;
         overflow: hidden;
     }
+    
 
-    .button:hover {
-        background: linear-gradient(135deg, #0056b3, #003f88); 
-        transform: translateY(-2px); 
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); 
+    /* Media query for extra small screens */
+    @media (max-width: 680px) {
+    
+
+        .button {
+            font-size: 0.65rem;
+        }
     }
 </style>
-
 
 <div class="button-grid glass-container">
     {#if userAuthenticated}
@@ -155,7 +153,6 @@
         <button class="button" on:click={() => showComponent('SiteClickStats')}>Site Click Stats</button>
     {/if}
 </div>
-
 
 <div class="background">
     {#if showLoginError || !userAuthenticated}

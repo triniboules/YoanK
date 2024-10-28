@@ -1,5 +1,14 @@
 <script lang="ts">
-  import { SvelteComponent } from 'svelte';
+  import clsx from 'clsx'; 
+  let isHovered = false;
+
+  const handleMouseEnter = () => {
+    isHovered = true;
+  };
+
+  const handleMouseLeave = () => {
+    isHovered = false;
+  };
 </script>
 
 <style>
@@ -9,13 +18,22 @@
     bottom: 0px;
     background-color: var(--col-deepblue);
     color: #fff;
-    text-align: center;
+    display: flex; /* Use flexbox for centering */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
     padding: 22px 0;
   }
 
-  footer p:hover {
-    transform: scale(1.05) translateY(-5px); /* Added hover effect to scale up and move up the <p> element */
-    transition: transform 0.3s ease-in-out; /* Added transition for smooth scaling and movement */
+  p {
+    margin: 0; /* Remove default margin */
+    display: flex; /* Use flexbox for the paragraph */
+    justify-content: center; /* Center text within the paragraph */
+    align-items: center; /* Center vertically */
+  }
+
+  .hovered {
+    transform: scale(1.05) translateY(-5px);
+    transition: transform 0.3s ease-in-out;
   }
 
   footer a {
@@ -23,8 +41,20 @@
     text-decoration: none;
     margin-left: 10px;
   }
+
+  @media (max-width: 600px) {
+    footer {
+      padding: 15px 0; 
+    }
+  }
 </style>
 
 <footer>
-  <p><a href="mailto:ksylvestre1@hotmail.com">Crafted by Sylvestre &copy; {new Date().getFullYear()}</a></p>
+  <p
+    class={clsx({ hovered: isHovered })} 
+    on:mouseenter={handleMouseEnter}
+    on:mouseleave={handleMouseLeave}
+  >
+    <a href="mailto:ksylvestre1@hotmail.com">Crafted by Sylvestre &copy; {new Date().getFullYear()}</a>
+  </p>
 </footer>

@@ -105,7 +105,7 @@
   @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&display=swap');
 
   .video-grid {
-    padding-top: 15px;
+    
     display: grid;
     grid-template-columns: repeat(3, minmax(250px, 1fr));
     gap: 5px;
@@ -115,6 +115,7 @@
     max-width: 100vw;
     padding-inline: 10px;
     box-sizing: border-box;
+    scale: 99%;
   }
 
   .video-item {

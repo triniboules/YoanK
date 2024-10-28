@@ -1,5 +1,6 @@
 <script lang="ts">
   import { v4 as uuidv4 } from 'uuid';
+  import clsx from 'clsx';
   import Contact from '../components/Contact.svelte';
   import { db, Timestamp, setDoc, doc, arrayUnion } from '../components/firebase';
   import Background from '../components/Background.svelte';
@@ -38,19 +39,31 @@
 </script>
 
 <header class="header">
-  <Background /> <!-- Background component added within header for containment -->
+
+  
   <div class="logo-left">
-      <button class="logo-button" on:click={handleLeftLogoClick} aria-label="Open Contact">
+      <button
+        class={clsx("logo-button", { highlight: showContact })}
+        on:click={handleLeftLogoClick}
+        aria-label="Open Contact">
           <img src="/image/NOM.webp" alt="Left Logo" />
       </button>
   </div>
-  <div class="logo-center">
-      <button class="logo-center-button" on:click={handleCenterLogoClick} aria-label="Refresh Page">
+  
+  <div class={clsx("logo-center", { hidden: window.innerWidth < 1200 })}>
+      <button
+        class="logo-center-button"
+        on:click={handleCenterLogoClick}
+        aria-label="Refresh Page">
           <img src="/image/logo.webp" alt="Center Logo" />
       </button>
   </div>
-  <div class="contact">
-      <button class="contact-button" on:click={handleLeftLogoClick} aria-label="Contact">
+  
+  <div class={clsx("contact", { hidden: window.innerWidth < 800, highlight: showContact })}>
+      <button
+        class={clsx("contact-button")}
+        on:click={handleLeftLogoClick}
+        aria-label="Contact">
           <img src="/image/contact.webp" alt="Contact" />
       </button>
   </div>
@@ -61,16 +74,16 @@
 {/if}
 
 <style>
-
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 3%;
   background: #cacaca00;
-  height: 68px;
-  position: relative; /* Set relative to contain Background component */
+  position: relative;
   z-index: 1;
+  margin: 30px;
+  margin-bottom: 10px;
+max-height: 50px;
 }
 
 .logo-left {
@@ -93,15 +106,21 @@
 }
 
 .logo-left img {
-  height: 75px;
+  height: 65px;
 }
+
 .logo-center img {
-  height: 90px;
+  height: 80px;
 }
 
 .contact-button img {
   height: 40px;
 }
+
+.hidden {
+  display: none;
+}
+
 
 @media (max-width: 1200px) {
   .logo-center {
@@ -110,12 +129,10 @@
 }
 
 @media (max-width: 800px) {
-  .contact, 
+  .contact,
   .logo-center {
     display: none;
   }
-  .header {
-    justify-content: space-around;
-  }
+
 }
 </style>

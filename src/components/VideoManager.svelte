@@ -208,7 +208,7 @@
  
     
     .container {
-        max-width: 60vw;
+        max-width: 100vw;
         margin: 0px auto; /* Added margin for spacing */
         padding: 10px;
         background-color: white;
@@ -241,9 +241,11 @@
     }
     
     .video-grid {
+        margin-top: -10vh;
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(15vw, 1fr)); /* Responsive columns */
-        gap: 30px;
+        grid-template-columns: repeat(auto-fill, minmax(30vw, 1fr)); /* Responsive columns */
+        gap: 20px;
+        scale: 80%;
         transition: transform 0.3s ease-in-out;
     }
     

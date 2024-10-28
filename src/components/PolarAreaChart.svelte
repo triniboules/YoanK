@@ -172,9 +172,7 @@
 
 <style lang="css">
   .stats-container {
-    max-width: 85vw;
-    margin: auto;
-    padding: 20px;
+    display: flex;
     
     background-color: rgba(161, 161, 161, 0.336);
     border-radius: 8px;

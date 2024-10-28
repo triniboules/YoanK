@@ -106,14 +106,14 @@
 <!-- UI Structure -->
 <div class="{containerClass} stats-container">
   {#if loading}
-    <div class="loading-container glass-container p-4 rounded-lg shadow-lg mb-4">
+    <div class="loading-container ">
       <p class="loading">{loadingMessage}</p>
       <div class="loader"></div> <!-- Adding a loader -->
     </div>
   {:else if errorMessage}
     <p class="{errorMessageClass}">{errorMessage}</p>
   {:else}
-    <div class="stats-grid glass-container p-4 rounded-lg shadow-lg mb-4">
+    <div class="stats-grid ">
       <div class="stat-item">
         <span>Unique Visitors:</span>
         <strong>{uniqueVisitors}</strong>
@@ -154,8 +154,8 @@
 
 <style>
   .stats-container {
-    max-width: 75vw;
-    margin: auto;
+
+    
     padding: 20px;
     backdrop-filter: blur(10px);
     background-color: #f9fafbe3; /* Semi-transparent background */
@@ -163,9 +163,11 @@
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     font-family: 'Arial', sans-serif;
     color: #333;
+    
   }
 
   .glass-container {
+    
     backdrop-filter: blur(10px);
     background-color: rgba(255, 255, 255, 0.85); /* Glass effect */
     padding: 20px;
@@ -175,6 +177,7 @@
   }
 
   .loading-container {
+    
     display: flex;
     justify-content: center;
     align-items: center;
