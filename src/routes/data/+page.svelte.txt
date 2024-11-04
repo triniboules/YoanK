@@ -1,0 +1,184 @@
+<script lang="ts">
+    import { db, doc, getDoc } from '../../components/firebase';
+    import VideoManager from '../../components/VideoManager.svelte';
+    import GlobalUser from '../../components/Globaluser.svelte';
+    import PolarAreaChart from '../../components/PolarAreaChart.svelte';
+    import SiteClickStats from '../../components/SiteClickStats.svelte';
+    import Background from '../../components/Background.svelte';
+
+    let activeComponent: string | null = null;
+    let showWelcome = true;
+    let userAuthenticated = false; 
+    let showLoginError = false; 
+    let usernameInput = '';
+    let passwordInput = '';
+
+    const verifyPassword = async () => {
+        try {
+            const userDoc = await getDoc(doc(db, 'users', 'Triniboules'));
+            if (userDoc.exists()) {
+                const storedPassword = userDoc.data()?.password;
+                if (passwordInput === storedPassword) {
+                    userAuthenticated = true;
+                    showLoginError = false;
+                    showWelcome = false;
+                } else {
+                    showLoginError = true;
+                }
+            } else {
+                showLoginError = true;
+            }
+        } catch (error) {
+            console.error("Error fetching data from Firestore:", error);
+            showLoginError = true; 
+        }
+    };
+
+    const handleSubmit = () => {
+        verifyPassword();
+    };
+
+    const showComponent = (component: string) => {
+        if (userAuthenticated) {
+            activeComponent = component;
+        } else {
+            showLoginError = true; 
+        }
+    };
+</script>
+
+<Background />
+<style>
+    :root {
+        --primary-color: #00A2FF; 
+        --input-background: rgba(255, 255, 255, 0.1);
+        --text-color: #FFFFFF;
+        --border-color: rgba(255, 255, 255, 0.5); /* Defined border color */
+        --button-background: #0066CC;
+        --button-hover: #007FFF;
+        --button-text-color: #FFFFFF;
+        --box-background: rgba(30, 30, 30, 0.85); /* Darker for contrast */
+    }
+
+    .background {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100vh;
+        background: var(--overlay-background);
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    .login-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 30px;
+        max-width: 400px;
+        width: 100%;
+        background: var(--box-background);
+        backdrop-filter: blur(12px);
+        border-radius: 12px;
+        border: 2px solid var(--border-color); /* Defined border */
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
+        text-align: center;
+        color: var(--text-color);
+    }
+
+    .header {
+        font-size: 1.8rem;
+        margin-bottom: 25px;
+        font-weight: bold;
+        color: var(--text-color);
+    }
+
+    .error-message {
+        color: #FF5E5E;
+        margin-bottom: 15px;
+        font-weight: bold;
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 14px;
+        margin: 10px 0;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        background: var(--input-background);
+        color: var(--text-color);
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.3s, background 0.3s;
+    }
+
+    .input-field:focus {
+        border-color: var(--primary-color);
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .button {
+        width: 100%;
+        padding: 12px;
+        margin-top: 20px;
+        border: none;
+        border-radius: 8px;
+        background: var(--button-background);
+        color: var(--button-text-color);
+        font-weight: bold;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background 0.3s, transform 0.2s;
+        font-size: 1rem;
+    }
+
+    .button:hover {
+        background: var(--button-hover);
+        transform: translateY(-2px); /* Adds a subtle lift on hover */
+    }
+
+    .button:active {
+        background: #0055AA; /* Slightly darker when active */
+        transform: translateY(0); /* Resets lift on click */
+    }
+</style>
+
+
+
+<div class="background">
+    {#if showLoginError || !userAuthenticated}
+        <div class="login-box">
+            {#if showLoginError}
+                <h2 class="error-message">Access Denied. Please log in to access components.</h2>
+            {/if}
+            {#if !userAuthenticated}
+                <h2 class="header">Log In</h2>
+                <input type="text" bind:value={usernameInput} placeholder="Username" class="input-field"/>
+                <input type="password" bind:value={passwordInput} placeholder="Password" class="input-field"/>
+                <button class="button" on:click={handleSubmit}>Submit</button>
+            {/if}
+        </div>
+    {/if}
+
+    <!-- Dynamic Component Rendering -->
+    {#if userAuthenticated && activeComponent}
+        <div class="button-grid">
+            <button class="button" on:click={() => showComponent('VideoManager')}>Video Manager</button>
+            <button class="button" on:click={() => showComponent('GlobalUser')}>Global User</button>
+            <button class="button" on:click={() => showComponent('PolarAreaChart')}>Polar Area Chart</button>
+            <button class="button" on:click={() => showComponent('SiteClickStats')}>Site Click Stats</button>
+        </div>
+
+        <!-- Display selected component -->
+        {#if activeComponent === 'VideoManager'}
+            <VideoManager />
+        {:else if activeComponent === 'GlobalUser'}
+            <GlobalUser />
+        {:else if activeComponent === 'PolarAreaChart'}
+            <PolarAreaChart />
+        {:else if activeComponent === 'SiteClickStats'}
+            <SiteClickStats />
+        {/if}
+    {/if}
+</div>

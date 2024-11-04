@@ -18,19 +18,28 @@
         userId = uuidv4();
     }
 
-    // Function to store location in Firestore
-    const storeLocation = async (lat: number, lon: number) => {
-        const location = { lat, lon, timestamp: serverTimestamp() };
+    async function storeLocationUsingIpApi() {
         try {
-            await addDoc(collection(db, 'users', userId, 'locations'), location);
-            console.log("Location stored:", location);
-        } catch (error) {
-            console.error("Error storing location:", error);
-        }
-    };
+            const response = await fetch('https://ip-api.com/json');
+            const data = await response.json();
 
-    // Function to store visits in Firestore
-    const storeVisit = async (lat: number, lon: number) => {
+            // Store location in Firestore
+            await addDoc(collection(db, 'users', userId, 'locations'), {
+                lat: data.lat,
+                lon: data.lon,
+                timestamp: serverTimestamp()
+            });
+
+            console.log("Location stored using ip-api:", {
+                lat: data.lat,
+                lon: data.lon
+            });
+        } catch (error) {
+            console.error("Error storing location using ip-api:", error);
+        }
+    }
+
+    async function storeVisit(lat: number, lon: number) {
         const visit = { timestamp: serverTimestamp(), lat, lon };
         try {
             await addDoc(collection(db, 'users', userId, 'visits'), visit);
@@ -38,10 +47,9 @@
         } catch (error) {
             console.error("Error storing visit:", error);
         }
-    };
+    }
 
-    // Function to store click count in Firestore
-    const storeClickCount = async () => {
+    async function storeClickCount() {
         const userClicksDoc = doc(db, 'users', userId);
         const docSnap = await getDoc(userClicksDoc);
         let clickCount = docSnap.exists() ? (docSnap.data().clickCount || 0) : 0;
@@ -52,34 +60,29 @@
         }, { merge: true });
 
         console.log("Click count updated:", clickCount + 1);
-    };
+    }
 
     // Handle button click
     const handleClick = async () => {
         if (!isTransitioningOut) {
             isTransitioningOut = true; // Start transitioning out
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(async (position) => {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
 
-                    // Store location and visit concurrently
-                    await Promise.all([
-                        storeLocation(lat, lon),
-                        storeVisit(lat, lon),
-                        storeClickCount()
-                    ]);
-                    
-                    onAccess();  // Call the external function to continue the workflow
-                }, async (error) => {
-                    console.error("Geolocation error:", error);
-                    // Proceed without location
-                    onAccess(); // Call onAccess even if geolocation fails
-                });
-            } else {
-                console.error("Geolocation not supported.");
-                onAccess(); // Call onAccess if geolocation is not supported
+            // Try to get approximate location using ip-api
+            await storeLocationUsingIpApi();
+
+            // If that fails, try to get the user ID from local storage
+            if (userId === undefined) {
+                userId = localStorage.getItem('userId') || uuidv4();
+                localStorage.setItem('userId', userId);
             }
+
+            // Store visit with default location
+            await Promise.all([
+                storeVisit(0, 0),
+                storeClickCount()
+            ]);
+
+            onAccess();  // Call the external function to continue the workflow
         }
     };
 </script>
