@@ -1,35 +1,74 @@
 <script lang="ts">
   import VideoViewer from './VideoViewer.svelte';
-  import { db } from './firebase';
-  import { collection, getDocs, doc, setDoc, increment, arrayUnion } from "firebase/firestore";
-  import type { Video } from '../types';
+  import { supabase } from '$lib/supabaseClient';
+  import type { Database } from '../lib/database.types';
+
+  type Video = Database['public']['Tables']['videos']['Row'] & { position: number };
+  type GridVideo = {
+    position: number;
+    videos: Database['public']['Tables']['videos']['Row'];
+  };
+  type VideoSourceType = 'youtube' | 'vimeo' | 'local';
+  type LogoType = 'Da' | 'Yoann';
 
   let videos: Video[] = [];
   let selectedVideo: Video | null = null;
+  let currentGridId: string | null = null;
 
   const logoMap: { [key: string]: string } = {
     Da: '/image/Da.webp',
     Yoann: '/image/logo.webp'
   };
 
-  // Fetch and initialize the list of videos
+  // Fetch videos with their grid positions
   const fetchVideos = async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, "videos"));
-      videos = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        description: doc.data().description || '',
-        name: doc.data().name || '',
-        thumbnail: doc.data().thumbnail || '',
-        youtubeId: doc.data().youtubeId || '',
-        position: typeof doc.data().position === 'number' ? doc.data().position : 0,
-        showLogo: typeof doc.data().showLogo === 'boolean' ? doc.data().showLogo : false,
-        logoType: doc.data().logoType || '', // Ensure that logoType can be an empty string, not undefined
-        clickCount: typeof doc.data().clickCount === 'number' ? doc.data().clickCount : 0,
-        clicks: Array.isArray(doc.data().clicks) ? doc.data().clicks : []
-      })) as Video[];
+      // First get the most recent grid configuration
+      const { data: gridData, error: gridError } = await supabase
+        .from('grid_configurations')
+        .select('id')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
 
-      videos.sort((a, b) => a.position - b.position);
+      if (gridError) throw gridError;
+      
+      if (gridData) {
+        currentGridId = gridData.id;
+
+        // Then get all videos with their positions in this grid
+        const { data, error } = await supabase
+          .from('grid_videos')
+          .select(`
+            position,
+            videos (
+              id,
+              name,
+              description,
+              source,
+              source_id,
+              youtube_id,
+              thumbnail,
+              show_logo,
+              logo_type,
+              created_at,
+              updated_at
+            )
+          `)
+          .eq('grid_id', currentGridId)
+          .order('position');
+
+        if (error) throw error;
+
+        if (data) {
+          // Type assertion to help TypeScript understand the data structure
+          const gridVideos = data as GridVideo[];
+          videos = gridVideos.map(item => ({
+            ...item.videos,
+            position: item.position
+          }));
+        }
+      }
     } catch (error) {
       console.error("Error fetching videos: ", error);
     }
@@ -37,8 +76,7 @@
 
   fetchVideos();
 
-  const openVideo = async (video: Video) => {
-    await recordVideoClick(video.id);
+  const openVideo = (video: Video) => {
     selectedVideo = video;
   };
 
@@ -46,26 +84,17 @@
     selectedVideo = null;
   };
 
-  // Record a click for the video
-  async function recordVideoClick(videoId: string) {
-    try {
-      const userId = localStorage.getItem('userId') || 'anonymous';
-      const clickTimestamp = new Date();
-
-      const videoRef = doc(db, "videos", videoId);
-      await setDoc(videoRef, {
-        clickCount: increment(1),
-        clicks: arrayUnion({ userId, timestamp: clickTimestamp }),
-      }, { merge: true });
-
-      console.log(`Recorded click for Video ID: ${videoId} by User ID: ${userId}`);
-    } catch (error) {
-      console.error("Error recording video click: ", error);
+  function getEmbedUrl(video: Video) {
+    switch (video.source) {
+      case 'youtube':
+        return `https://www.youtube.com/embed/${video.youtube_id || video.source_id}`;
+      case 'vimeo':
+        return `https://player.vimeo.com/video/${video.source_id}`;
+      case 'local':
+        return video.source_id;
+      default:
+        return '';
     }
-  }
-
-  function getEmbedUrl(videoId: string) {
-    return `https://www.youtube.com/embed/${videoId}`;
   }
 
   function handleImageLoad(event: Event) {
@@ -73,13 +102,13 @@
     img.style.opacity = '1';
   }
 
-  function getLogoPath(logoType: string | undefined) {
-    return logoType && logoMap[logoType] ? logoMap[logoType] : ''; // Handle undefined
+  function getLogoPath(logoType: LogoType | null) {
+    return logoType && logoMap[logoType] ? logoMap[logoType] : '';
   }
 </script>
 
 {#if selectedVideo}
-  <VideoViewer {selectedVideo} on:close={closeVideo} />
+  <VideoViewer {selectedVideo} onClose={closeVideo} />
 {/if}
 
 <div class="video-grid">
@@ -87,11 +116,11 @@
     <button class="video-item" on:click={() => openVideo(video)} aria-label={`Open ${video.name}`}>
       <div class="thumbnail-wrapper">
         <img src={video.thumbnail} alt={video.name} class="thumbnail" loading="lazy" on:load={handleImageLoad} style="opacity: 0; transition: opacity 3s ease;" />
-        {#if video.showLogo && video.logoType}
+        {#if video.show_logo && video.logo_type}
           <img 
-            src={getLogoPath(video.logoType)} 
-            alt={video.logoType === 'Da' ? 'DA SYNCRO logo' : 'Yoann logo'} 
-            class="logo {video.logoType !== 'Da' ? 'small-logo' : ''}" />
+            src={getLogoPath(video.logo_type)} 
+            alt={video.logo_type === 'Da' ? 'DA SYNCRO logo' : 'Yoann logo'} 
+            class="logo {video.logo_type !== 'Da' ? 'small-logo' : ''}" />
         {/if}
       </div>
       <div class="overlay">
@@ -217,4 +246,3 @@
     }
   }
 </style>
-

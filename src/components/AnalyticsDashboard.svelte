@@ -1,28 +1,32 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import { db } from './firebase.js'; // Adjust the path to your Firebase configuration
+    import { db } from '../components/firebase.js';
     import { collection, getDocs } from 'firebase/firestore';
-    import Chart from 'chart.js/auto'; // Import Chart.js for charts
+    import Chart from 'chart.js/auto';
+    import SiteClickStats from './SiteClickStats.svelte';
+    import VideoClickStats from './VideoClickStats.svelte';
+    import 'leaflet/dist/leaflet.css';
 
     interface Visit {
-        id: string;           // Document ID
-        userId: string;      // User ID of the visit
-        timestamp: Date;     // Visit timestamp
-        lat: number | null;   // Latitude or null
-        lon: number | null;   // Longitude or null
+        id: string;
+        userId: string;
+        timestamp: Date;
+        lat: number | null;
+        lon: number | null;
     }
 
     interface UserVisitCount {
-        userId: string;      // User ID
-        visitCount: number;  // Count of visits for the user
+        userId: string;
+        visitCount: number;
     }
 
-    let visits: Visit[] = [];  // Store visits as an array of Visit objects
-    let userVisitCounts: UserVisitCount[] = []; // Array to hold visit counts per user
-    let loading = true;        // Loading state
-    let errorMessage: string | null = null; // Error message state
-    let map: L.Map | null = null; // Map variable to be initialized later
-    let chart: Chart | null = null; // Chart variable to be initialized later
+    let visits: Visit[] = [];
+    let userVisitCounts: UserVisitCount[] = [];
+    let loading = true;
+    let errorMessage: string | null = null;
+    let map: any = null;
+    let chart: Chart | null = null;
+    let activeTab = 'overview';
 
     // Function to fetch all visits for all users
     async function fetchAllVisits() {
@@ -30,11 +34,11 @@
             const usersSnap = await getDocs(collection(db, 'users'));
 
             let allVisits: Visit[] = [];
-            userVisitCounts = []; // Initialize visit counts array
+            userVisitCounts = [];
 
             for (const userDoc of usersSnap.docs) {
                 const userId = userDoc.id;
-                let visitCount = 0; // Initialize visit count for the user
+                let visitCount = 0;
 
                 const visitsSnap = await getDocs(collection(db, 'users', userId, 'visits'));
 
@@ -42,53 +46,51 @@
                     const data = visitDoc.data();
                     allVisits.push({
                         id: visitDoc.id,
-                        userId: userId, // Reference to user ID
-                        timestamp: data.timestamp.toDate(), // Convert Firestore timestamp to JS Date
-                        lat: data.lat || null, // Extract lat
-                        lon: data.lon || null  // Extract lon
+                        userId: userId,
+                        timestamp: data.timestamp.toDate(),
+                        lat: data.lat || null,
+                        lon: data.lon || null
                     });
-                    visitCount++; // Increment visit count for the user
+                    visitCount++;
                 });
 
                 userVisitCounts.push({ userId, visitCount });
             }
 
-            visits = allVisits; // Set the visits array
-            drawChart(); // Draw the chart after visits are fetched
+            visits = allVisits;
+            drawChart();
         } catch (error) {
             console.error('Error fetching visits:', error);
-            errorMessage = 'Failed to fetch visits. Please try again later.'; // Set error message
+            errorMessage = 'Failed to fetch visits. Please try again later.';
         } finally {
-            loading = false; // Set loading to false after fetching
+            loading = false;
         }
     }
 
-    // Initialize map and fetch visits on component mount
     onMount(async () => {
-        await fetchAllVisits(); // Fetch all visits for all users
+        await fetchAllVisits();
 
         if (typeof window !== 'undefined') {
-            const L = await import('leaflet'); // Dynamically import Leaflet
+            const L = await import('leaflet');
 
-            map = L.map('map').setView([51.505, -0.09], 13); // Default view can be changed
+            map = L.map('map').setView([51.505, -0.09], 13);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
-                attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                attribution: 'OpenStreetMap contributors'
             }).addTo(map);
 
-            addMarkersToMap(); // Add markers after map initialization
+            addMarkersToMap();
         }
     });
 
-    // Function to add markers to the map
     function addMarkersToMap() {
         import('leaflet').then(L => {
-            if (map) { // Ensure map is not null
+            if (map) {
                 const markers = visits
-                    .filter(v => v.lat !== null && v.lon !== null) // Filter out visits with null coordinates
+                    .filter(v => v.lat !== null && v.lon !== null)
                     .map(v => {
-                        const marker = L.marker([v.lat!, v.lon!]).addTo(map!);
+                        const marker = L.marker([v.lat!, v.lon!]).addTo(map);
                         marker.bindTooltip(`
                             <div class="tooltip-content">
                                 <strong>User ID:</strong> ${v.userId}<br>
@@ -105,17 +107,16 @@
 
                 if (markers.length > 0) {
                     const group = L.featureGroup(markers);
-                    group.addTo(map!);
-                    map!.fitBounds(group.getBounds());
+                    group.addTo(map);
+                    map.fitBounds(group.getBounds());
                 }
             }
         });
     }
 
-    // Function to draw a chart showing user visit counts
     function drawChart() {
         const ctx = document.getElementById('visitChart') as HTMLCanvasElement;
-        if (chart) chart.destroy(); // Destroy existing chart if it exists
+        if (chart) chart.destroy();
 
         const labels = userVisitCounts.map(u => u.userId);
         const data = userVisitCounts.map(u => u.visitCount);
@@ -144,77 +145,157 @@
     }
 </script>
 
+<div class="dashboard">
+    <div class="tabs">
+        <button 
+            class="tab-button {activeTab === 'overview' ? 'active' : ''}" 
+            on:click={() => activeTab = 'overview'}
+        >
+            Overview
+        </button>
+        <button 
+            class="tab-button {activeTab === 'locations' ? 'active' : ''}" 
+            on:click={() => activeTab = 'locations'}
+        >
+            Locations
+        </button>
+        <button 
+            class="tab-button {activeTab === 'videos' ? 'active' : ''}" 
+            on:click={() => activeTab = 'videos'}
+        >
+            Video Stats
+        </button>
+    </div>
+
+    <div class="content">
+        {#if loading}
+            <div class="loading">Loading analytics...</div>
+        {:else if errorMessage}
+            <div class="error">{errorMessage}</div>
+        {:else}
+            {#if activeTab === 'overview'}
+                <div class="overview-section">
+                    <SiteClickStats 
+                        containerClass="stats-container" 
+                        errorMessageClass="error-message"
+                    />
+                </div>
+            {:else if activeTab === 'locations'}
+                <div class="locations-section">
+                    <div id="map"></div>
+                    <div class="chart-container">
+                        <canvas id="visitChart"></canvas>
+                    </div>
+                </div>
+            {:else if activeTab === 'videos'}
+                <div class="videos-section">
+                    <VideoClickStats />
+                </div>
+            {/if}
+        {/if}
+    </div>
+</div>
+
 <style>
-    /* Import Leaflet CSS */
-    @import url('https://unpkg.com/leaflet/dist/leaflet.css');
-
-    /* Import Chart.js CSS (optional) */
-    @import url('https://cdn.jsdelivr.net/npm/chart.js/dist/chart.css');
-
-    /* Style for the map */
-    #map {
-        height: 50vh; /* Set a height for the map */
-        width: 50vw;   /* Set width to 100% for responsive design */
-    }
-
-    /* Style for the chart */
-    .chart-container {
-        width: 100%; /* Responsive width */
-        max-width: 500px; /* Limit max width for better layout */
-        margin: 20px auto; /* Center the chart */
-    }
-
-    /* Container styles */
-    .container {
+    .dashboard {
         padding: 20px;
-        background: rgba(255, 255, 255, 0.7); /* Semi-transparent background for glass effect */
-        border-radius: 10px; /* Rounded corners */
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Enhanced shadow */
-        max-width: 80vw; /* Set max width to 80vw for better layout */
-        margin: 20px auto; /* Centering the container */
-        backdrop-filter: blur(10px); /* Apply blur effect for the glass container */
-        border: 1px solid rgba(255, 255, 255, 0.5); /* Light border for better visibility */
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        max-width: 90vw;
+        margin: 20px auto;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
-    /* Title styles */
-    .title {
-        font-size: 2rem; /* Larger heading */
-        text-align: center; /* Center align title */
-        color: #2c3e50; /* Darker color for better contrast */
-        margin-bottom: 20px; /* Space below heading */
-        text-transform: uppercase; /* Uppercase letters */
-        letter-spacing: 1px; /* Spacing between letters */
+    .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 10px;
     }
 
-    /* Loading message styles */
-    .loading {
-        text-align: center;
-        font-size: 1.5rem;
-        color: #555;
+    .tab-button {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
     }
 
-    /* Error message styles */
-    .error {
-        color: red;
-        text-align: center;
+    .tab-button:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .tab-button.active {
+        background: rgba(255, 255, 255, 0.3);
         font-weight: bold;
     }
 
+    .content {
+        min-height: 500px;
+    }
 
+    #map {
+        height: 400px;
+        width: 100%;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .chart-container {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 8px;
+        margin-top: 20px;
+    }
+
+    .loading {
+        text-align: center;
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.8);
+        padding: 40px;
+    }
+
+    .error {
+        color: #ff4444;
+        text-align: center;
+        background: rgba(255, 68, 68, 0.1);
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+    }
+
+    .overview-section,
+    .locations-section,
+    .videos-section {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        padding: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard {
+            max-width: 95vw;
+            padding: 10px;
+        }
+
+        .tabs {
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            flex: 1 1 auto;
+            text-align: center;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+        }
+
+        #map {
+            height: 300px;
+        }
+    }
 </style>
-
-<div class="container">
-    <h1 class="title">User Visit Locations</h1>
-    
-    <!-- Display loading state or error message -->
-    {#if loading}
-        <p class="loading">Loading visits...</p>
-    {:else if errorMessage}
-        <p class="error">{errorMessage}</p>
-    {:else}
-        <div id="map"></div> <!-- Only show map if visits are loaded -->
-        <div class="chart-container">
-            <canvas id="visitChart"></canvas> <!-- Canvas for Chart.js -->
-        </div>
-    {/if}
-</div>

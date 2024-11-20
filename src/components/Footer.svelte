@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts">   
   import clsx from 'clsx'; 
   let isHovered = false;
 
@@ -18,28 +18,43 @@
     bottom: 0px;
     background-color: var(--col-deepblue);
     color: #fff;
-    display: flex; /* Use flexbox for centering */
-    justify-content: center; /* Center horizontally */
-    align-items: center; /* Center vertically */
-    padding: 22px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 0;
   }
 
   p {
-    margin: 0; /* Remove default margin */
-    display: flex; /* Use flexbox for the paragraph */
-    justify-content: center; /* Center text within the paragraph */
-    align-items: center; /* Center vertically */
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
   }
 
-  .hovered {
-    transform: scale(1.05) translateY(-5px);
-    transition: transform 0.3s ease-in-out;
+  @keyframes breathing {
+    0% {
+      opacity: 0.4;
+    }
+    50% {
+      opacity: 0.7;
+    }
+    100% {
+      opacity: 0.4;
+    }
   }
 
   footer a {
-    color: #fff;
+    color: rgba(0, 0, 0, 0.7);
     text-decoration: none;
     margin-left: 10px;
+    transition: all 0.5s ease;
+    animation: breathing 3s ease-in-out infinite;
+  }
+
+  .hovered a {
+    color: #fff;
+    animation: none;
   }
 
   @media (max-width: 600px) {

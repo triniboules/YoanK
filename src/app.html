@@ -5,11 +5,35 @@
     <link rel="icon" href="%sveltekit.assets%/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="https://fonts.googleapis.com/css2?family=Bank+Gothic&display=swap" rel="stylesheet">
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
 
-     <div style="display: contents">%sveltekit.head%</div>
+      #svelte {
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        min-height: 100vh;
+        position: relative;
+      }
+    </style>
+    <div style="display: contents">%sveltekit.head%</div>
     <meta charset="utf-8" /> <!-- This sets the character encoding for the document -->
     <link rel="icon" href="%sveltekit.assets%/favicon.png" /> <!-- This sets the favicon for the website -->
     <meta name="viewport" content="width=device-width, initial-scale=1" /> <!-- This sets the viewport settings for responsive design -->
+  </head>
+  <body>
     <div style="display: contents">%sveltekit.body%</div> <!-- This is where the app is injected and displayed -->
   </body>
 </html>

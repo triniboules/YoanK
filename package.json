@@ -48,6 +48,7 @@
   "type": "module",
   "dependencies": {
     "@storybook/svelte": "^8.3.5",
+    "@supabase/supabase-js": "^2.46.1",
     "chart.js": "^4.4.4",
     "chartjs-adapter-date-fns": "^3.0.0",
     "chartjs-plugin-zoom": "^2.0.1",
@@ -60,7 +61,7 @@
     "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.3.1",
     "svelte-chartjs": "^3.1.5",
-    "svelte-dnd-action": "^0.9.51",
+    "svelte-dnd-action": "^0.9.52",
     "typewriter-effect": "^2.21.0",
     "uuid": "^10.0.0"
   },

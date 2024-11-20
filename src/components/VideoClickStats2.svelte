@@ -23,10 +23,10 @@
         { id: 2, name: 'Claire et Martin', youtubeId: 'I-h4WH3tVcc', thumbnail: '/image/2.webp', description: 'Claire et Martin\nOpérateur Caméra', showLogo: true },
         { id: 3, name: 'Nathalie & Christophe', youtubeId: 'gZJyI-PGTHI', thumbnail: '/image/3.webp', description: 'Nathalie & Christophe\nOpérateur Caméra', showLogo: true },
         { id: 4, name: 'Les Nuits du Réal', youtubeId: 'R2PnDV97Zrg', thumbnail: '/image/4.webp', description: 'Les Nuits du Réal\nOpérateur Caméra', showLogo: true },
-        { id: 5, name: 'La Lucarne d\'Arianne', youtubeId: '3d6SlZscoeM', thumbnail: '/image/5.webp', description: 'La Lucarne d\'Arianne\nRéalisation\nPrise de son\nOpérateur Caméra', showLogo: true },
+        { id: 5, name: "La Lucarne d'Arianne", youtubeId: '3d6SlZscoeM', thumbnail: '/image/5.webp', description: "La Lucarne d'Arianne\nRéalisation\nPrise de son\nOpérateur Caméra", showLogo: true },
         { id: 6, name: 'Litographie - Marko Zoric', youtubeId: 'stdlTlbi_o0', thumbnail: '/image/6.webp', description: 'Litographie - Marko Zoric\nRéalisation\nMontage', showLogo: true },
         { id: 7, name: 'Unlocked - Sophie Jarmouni', youtubeId: 'YKA3anXENjQ', thumbnail: '/image/7.webp', description: 'Unlocked - Sophie Jarmouni\nAssistant Caméra\nFocus puller', showLogo: false },
-        { id: 8, name: 'Rien qu\'ça - GOHU', youtubeId: 'DSNs7fQifyM', thumbnail: '/image/8.webp', description: 'Rien qu\'ça - GOHU\nRéalisation\nPrise de vue\nMontage', showLogo: true },
+        { id: 8, name: "Rien qu'ça - GOHU", youtubeId: 'DSNs7fQifyM', thumbnail: '/image/8.webp', description: "Rien qu'ça - GOHU\nRéalisation\nPrise de vue\nMontage", showLogo: true },
         { id: 9, name: 'Hold Up - Yautjaxx', youtubeId: 'lOygdbJni8A', thumbnail: '/image/9.webp', description: 'Hold Up - Yautjaxx\nOpérateur Caméra\nPrise de vue', showLogo: true },
     ];
 
@@ -41,9 +41,12 @@
         try {
             const querySnapshot = await getDocs(collection(db, "videos"));
             videoStats = querySnapshot.docs.map(doc => ({
-                id: parseInt(doc.id.split('-')[1]), 
-                clickCount: doc.data().clickCount || 0,
-                clicks: doc.data().clicks || []
+                id: parseInt(doc.id), 
+                clickCount: doc.data().clicks?.length || 0,
+                clicks: (doc.data().clicks || []).map((click: any) => ({
+                    userId: click.userId,
+                    timestamp: click.timestamp.toDate()
+                }))
             }));
             loading = false;
         } catch (error) {
@@ -73,7 +76,7 @@
                         <ul class="click-list">
                             {#each video.clicks as click, index}
                                 <li class="click-item">
-                                    User: {click.userId}, Time: {click.timestamp.toLocaleString()}
+                                    User: {click.userId}, Time: {new Date(click.timestamp).toLocaleString()}
                                 </li>
                             {/each}
                         </ul>
@@ -114,7 +117,7 @@
     .video-item {
         background-color: #f9f9f957;
         border-radius: 8px;
-        padding: 0px;
+        padding: 15px;
         margin-bottom: 20px;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         flex: 1 1 calc(33.333% - 10px);
@@ -151,6 +154,14 @@
         font-size: 0.9rem;
         color: #7f8c8d; /* Light grey */
         margin-bottom: 5px;
+    }
+
+    /* Loading state */
+    .loading {
+        text-align: center;
+        color: #7f8c8d;
+        font-size: 1.2rem;
+        padding: 20px;
     }
 
     /* Media queries for responsiveness */

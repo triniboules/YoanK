@@ -1,466 +1,728 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { getDocs, collection, updateDoc, doc, deleteDoc, addDoc } from "firebase/firestore"; // Import addDoc
-    import { db } from "./firebase";
+    import { supabase } from '$lib/supabaseClient';
+    import type { PostgrestError } from '@supabase/supabase-js';
 
     interface Video {
         id: string;
         description: string;
         name: string;
-        logoType: string;
-        position: number;
-        showLogo: boolean;
+        source: 'youtube' | 'vimeo' | 'local';
+        source_id: string;
         thumbnail: string;
-        youtubeId: string;
+        show_logo: boolean;
+        logo_type: 'none' | 'logo' | 'Da' | null;
+        created_at: string;
+        updated_at: string;
+        position: number;
+        [key: string]: string | number | boolean | null; // Index signature for dynamic access
     }
 
-    const handleClick = (id: string) => {
-        if (editVideoId && editVideoId === id) {
-            exitEditMode();
-        } else {
-            const video = videos.find(video => video.id === id);
-            if (video) {
-                enterEditMode(video);
-            }
-        }
-    };
-
-    const logoOptions = [
-        { value: '', label: 'No Logo' },
-        { value: 'Da', label: 'Logo Da' },
-        { value: 'Yoann', label: 'Logo Yoann' }
-    ];
-
     let videos: Video[] = [];
-    let draggedVideoId: string = '';
+    let draggedVideoId: string | null = null;
+    let draggedIndex: number | null = null;
+    let hasUnsavedChanges = false;
     let message = '';
     let messageType: 'error' | 'success' | null = null;
     let editVideoId: string = "";
-    let editedVideo: Partial<Video> = {};
-    let isCreateMode: boolean = false; // State variable to track create mode
+    let editedVideo: Partial<Video> & { [key: string]: any } = {};
+    let isCreateMode: boolean = false;
 
-    onMount(async () => {
-        await loadVideos();
+    onMount(() => {
+        loadVideos();
+        const channel = supabase
+            .channel('videos')
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'videos' },
+                () => loadVideos()
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     });
 
     const loadVideos = async () => {
         try {
-            const querySnapshot = await getDocs(collection(db, "videos"));
-            videos = querySnapshot.docs.map(doc => {
-                const data = doc.data();
-                return {
-                    id: doc.id,
-                    description: data.description || "",
-                    name: data.name || "",
-                    logoType: data.logoType || "",
-                    position: typeof data.position === 'number' ? data.position : 0,
-                    showLogo: typeof data.showLogo === 'boolean' ? data.showLogo : false,
-                    thumbnail: data.thumbnail || "",
-                    youtubeId: data.youtubeId || "",
-                } as Video;
-            });
-            videos.sort((a, b) => a.position - b.position);
+            const { data, error } = await supabase
+                .from('videos')
+                .select('*')
+                .order('position');
+
+            if (error) throw error;
+
+            videos = data || [];
         } catch (error) {
-            setMessage(`Failed to load videos: ${(error as Error).message}`, 'error');
+            const pgError = error as PostgrestError;
+            setMessage(`Failed to load videos: ${pgError.message}`, 'error');
         }
     };
 
-    const validateVideos = () => {
-        return videos.every(video => {
-            const hasValidId = typeof video.id === 'string' && video.id.trim() !== '';
-            const hasValidPosition = typeof video.position === 'number' && Number.isInteger(video.position);
-            return hasValidId && hasValidPosition;
-        });
+    const handleDragStart = (e: DragEvent, id: string) => {
+        if (!e.dataTransfer || !e.target) return;
+        
+        draggedVideoId = id;
+        draggedIndex = videos.findIndex(v => v.id === id);
+        e.dataTransfer.effectAllowed = 'move';
+        const target = e.target as HTMLElement;
+        target.closest('.video-item')?.classList.add('dragging');
     };
 
-    const handleDragStart = (e: DragEvent, id: string) => {
-        draggedVideoId = id;
-        e.dataTransfer!.setData("text/plain", id);
+    const handleDragEnd = () => {
+        draggedVideoId = null;
+        draggedIndex = null;
     };
 
     const handleDragOver = (e: DragEvent) => {
         e.preventDefault();
-    };
+        if (!draggedVideoId || !draggedIndex || !e.target) return;
+        
+        const target = e.target as HTMLElement;
+        const targetItem = target.closest('.video-item');
+        if (!targetItem) return;
 
-    const handleDrop = (e: DragEvent, targetId: string) => {
-        e.preventDefault();
-        if (draggedVideoId && draggedVideoId !== targetId) {
-            const draggedIndex = videos.findIndex(video => video.id === draggedVideoId);
-            const targetIndex = videos.findIndex(video => video.id === targetId);
-            if (draggedIndex !== -1 && targetIndex !== -1) {
-                [videos[draggedIndex], videos[targetIndex]] = [videos[targetIndex], videos[draggedIndex]];
-                updatePositions();
-            }
+        const targetId = targetItem.getAttribute('data-id');
+        if (!targetId || targetId === draggedVideoId) return;
+
+        const targetIndex = videos.findIndex(v => v.id === targetId);
+        if (targetIndex === -1) return;
+
+        // Only update if position changed
+        if (targetIndex !== draggedIndex) {
+            const draggedVideo = videos[draggedIndex];
+            videos.splice(draggedIndex, 1);
+            videos.splice(targetIndex, 0, draggedVideo);
+            videos = videos; // trigger reactivity
+            draggedIndex = targetIndex;
+            hasUnsavedChanges = true;
         }
-        draggedVideoId = "";
     };
 
-    const updatePositions = () => {
-        videos.forEach((video, index) => {
-            video.position = index;
-        });
+    const handleDrop = (e: DragEvent) => {
+        e.preventDefault();
     };
 
-    const saveAllChanges = async () => {
-        if (!validateVideos()) {
-            setMessage("Invalid video data. Please check the video list.", 'error');
+    const saveVideoOrder = async () => {
+        if (!hasUnsavedChanges) {
+            setMessage('No changes to save', 'success');
             return;
         }
 
         try {
-            const updates = videos.map(video => {
-                const videoRef = doc(db, "videos", video.id);
-                return updateDoc(videoRef, { position: video.position });
-            });
+            // Update positions one by one to avoid touching other fields
+            for (let i = 0; i < videos.length; i++) {
+                const { error } = await supabase
+                    .from('videos')
+                    .update({ position: i })
+                    .eq('id', videos[i].id);
+                
+                if (error) throw error;
+            }
 
-            await Promise.all(updates);
-            setMessage("All changes saved successfully!", 'success');
+            hasUnsavedChanges = false;
+            setMessage('Video order saved successfully', 'success');
         } catch (error) {
-            setMessage(`Failed to save changes: ${(error as Error).message}`, 'error');
+            const pgError = error as PostgrestError;
+            setMessage(`Failed to save changes: ${pgError.message}`, 'error');
         }
     };
 
     const setMessage = (text: string, type: 'error' | 'success') => {
         message = text;
         messageType = type;
-
         setTimeout(() => {
             message = '';
             messageType = null;
         }, 3000);
     };
 
-    const enterEditMode = (video: Video) => {
-        editVideoId = video.id;
+    const handleClick = (id: string) => {
+        const video = videos.find(v => v.id === id);
+        if (!video) return;
+
+        editVideoId = id;
         editedVideo = { ...video };
-        isCreateMode = false; // Reset to edit mode
     };
 
     const createNewVideo = () => {
-        if (!isCreateMode) {
-            editVideoId = ""; // Clear the current video ID
-            editedVideo = { id: "", description: "", name: "", logoType: "", position: 0, showLogo: false, thumbnail: "", youtubeId: "" }; // Initialize a new empty video object
-            isCreateMode = true; // Switch to create mode
-        }
+        isCreateMode = true;
+        editedVideo = {
+            name: '',
+            description: '',
+            source: 'youtube' as const,
+            source_id: '',
+            thumbnail: '',
+            show_logo: false,
+            logo_type: null
+        };
     };
 
-    const saveEditedVideo = async () => {
+    const handleSave = async () => {
         try {
+            if (!editedVideo.name) {
+                throw new Error('Name is required');
+            }
+
             if (isCreateMode) {
-                await addDoc(collection(db, "videos"), editedVideo as Video);
-                setMessage("New video created successfully!", 'success');
-            } else {
-                const videoRef = doc(db, "videos", editVideoId!);
-                await updateDoc(videoRef, {
+                const videoData = {
                     ...editedVideo,
-                    logoType: editedVideo.logoType || ''
-                });
-                const videoIndex = videos.findIndex(video => video.id === editVideoId);
-                if (videoIndex !== -1) {
-                    videos[videoIndex] = { ...videos[videoIndex], ...editedVideo };
+                    position: videos.length
+                };
+                const { data, error } = await supabase
+                    .from('videos')
+                    .insert([videoData])
+                    .select();
+
+                if (error) throw error;
+                if (data) {
+                    videos = [...videos, data[0]];
+                    setMessage("Video created successfully!", 'success');
                 }
-                setMessage("Video updated successfully!", 'success');
+            } else {
+                // Get the original video
+                const originalVideo = videos.find(v => v.id === editVideoId);
+                if (!originalVideo) {
+                    throw new Error('Video not found');
+                }
+
+                // Compare each field and only include changed ones
+                const changes: Partial<Video> = {};
+                (Object.keys(editedVideo) as Array<keyof Video>).forEach(key => {
+                    if (key === 'name' || editedVideo[key] !== originalVideo[key]) {
+                        changes[key] = editedVideo[key] ?? originalVideo[key];
+                    }
+                });
+
+                // Only update if there are changes
+                if (Object.keys(changes).length > 0) {
+                    const { error } = await supabase
+                        .from('videos')
+                        .update({
+                            ...changes,
+                            name: editedVideo.name || originalVideo.name, // Ensure name is always set
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', editVideoId);
+
+                    if (error) throw error;
+                    videos = videos.map(v => v.id === editVideoId ? { ...v, ...changes } : v);
+                    setMessage("Video updated successfully!", 'success');
+                } else {
+                    setMessage("No changes to save", 'success');
+                }
             }
             exitEditMode();
         } catch (error) {
-            setMessage(`Failed to save video: ${(error as Error).message}`, 'error');
+            const pgError = error as PostgrestError;
+            setMessage(`Failed to save video: ${pgError.message}`, 'error');
         }
     };
 
     const exitEditMode = () => {
         editVideoId = "";
         editedVideo = {};
-        isCreateMode = false; // Reset to edit mode
+        isCreateMode = false;
     };
 
     const deleteVideo = async (id: string) => {
-        const confirmDelete = confirm("Are you sure you want to delete this video?");
-        if (!confirmDelete) return;
+        if (!confirm('Are you sure you want to delete this video?')) {
+            return;
+        }
 
         try {
-            await deleteDoc(doc(db, "videos", id));
+            const { error } = await supabase
+                .from('videos')
+                .delete()
+                .eq('id', id);
+
+            if (error) throw error;
             videos = videos.filter(video => video.id !== id);
             setMessage("Video deleted successfully!", 'success');
             exitEditMode();
         } catch (error) {
-            setMessage(`Failed to delete video: ${(error as Error).message}`, 'error');
+            const pgError = error as PostgrestError;
+            setMessage(`Failed to delete video: ${pgError.message}`, 'error');
         }
     };
 
-    const getLogoPath = (logoType: string) => {
-        if (logoType === "Da") return "/image/Da.webp";
-        if (logoType === "Yoann") return "/image/logo.webp";
-        return ""; // No logo
+    const getDefaultThumbnail = (videoId: string) => {
+        return videoId ? 
+            `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` :
+            '/placeholder-thumbnail.jpg';
+    };
+
+    const closeModal = () => {
+        exitEditMode();
     };
 </script>
 
 <style>
-    :root {
-        --primary-color: #007BFF;
-        --success-color: #28a745;
-        --error-color: #dc3545;
-        --background-color: #f9f9f900;
-        --text-color: #333;
-        --highlight-color: #ffcc00;
-        --hover-text-color: #007bff;
+    :global(body) {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        width: 100vw;
     }
-    
- 
-    
+
     .container {
-        max-width: 100vw;
-        margin: 0px auto; /* Added margin for spacing */
-        padding: 10px;
-        background-color: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: calc(100vw - 232px); /* 200px sidebar + 32px padding */
+        margin: 0 auto;
+        padding: 1rem;
+        color: #fff;
     }
-    
-    h2 {
-        font-family: 'Lato', sans-serif;
-        font-size: 1.8rem; /* Increased font size for better readability */
+
+    .message {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 4px;
         text-align: center;
-        color: var(--text-color);
-        margin-bottom: 24px;
-        background-color: #f9f9f9;
-        padding: 10px; /* Added padding for better touch targets */
-        border-radius: 8px; /* Rounded corners for visual appeal */
     }
-    
-    h2:hover {
-        color: var(--hover-text-color);
+
+    .message.error {
+        background: #ff4444;
+        color: white;
     }
-    
-    h2::after {
-        content: '';
-        display: block;
-        height: 2px; /* Increased thickness for better visibility */
-        width: 50%;
-        margin: 10px auto; /* Spacing around the line */
-        background-color: currentColor;
+
+    .message.success {
+        background: #28a745;
+        color: white;
     }
-    
-    .video-grid {
-        margin-top: -10vh;
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(30vw, 1fr)); /* Responsive columns */
-        gap: 20px;
-        scale: 80%;
-        transition: transform 0.3s ease-in-out;
+
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
     }
-    
-    .video-item {
-        position: relative;
-        border-radius: 10px;
-        overflow: hidden;
+
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        color: black;
+    }
+
+    button {
+        padding: 8px 16px;
+        border-radius: 4px;
+        border: none;
         cursor: pointer;
-        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        font-size: 14px;
+        transition: background-color 0.2s;
+    }
+
+    .save-button {
+        background-color: #4CAF50;
+        color: white;
+        font-weight: bold;
+        margin-top: 20px;
+    }
+
+    .save-button:hover {
+        background-color: #45a049;
+    }
+
+    .cancel-button {
+        background-color: #f44336;
+        color: white;
+        margin-right: 10px;
+    }
+
+    .cancel-button:hover {
+        background-color: #da190b;
+    }
+
+    .delete-button {
+        background-color: #dc3545;
+        color: white;
+        margin-right: auto;
+    }
+
+    .delete-button:hover {
+        background-color: #c82333;
+    }
+
+    .button-group {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+        width: 100%;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    .form-group label {
+        font-weight: 500;
+        color: var(--text-1);
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 0.5rem;
+        border: 1px solid var(--surface-3);
+        border-radius: 4px;
+        background: var(--surface-1);
+        color: var(--text-1);
+        width: 100%;
+        font-size: 1rem;
+    }
+
+    .form-group textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: auto;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        padding: 1.5rem;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+
+    @media (max-width: 1200px) {
+        .grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .video-item {
+        background: #2a2a2a;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: transform 0.2s;
+        cursor: pointer;
+    }
+
+    .video-item:hover {
+        transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
-    
-    .video-item:hover {
-        transform: scale(1.05);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+
+    .video-item.dragging {
+        opacity: 0.5;
     }
-    
-    .video-item img {
+
+    .thumbnail-wrapper {
+        position: relative;
+        padding-top: 56.25%;
+        background: #000;
+    }
+
+    .thumbnail {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
-        height: auto;
-        border-radius: 10px;
-        transition: transform 0.3s ease-in-out;
+        height: 100%;
+        object-fit: cover;
     }
-    
-    .logo {
+
+    .logo-badge {
         position: absolute;
-        top: 15px;
-        right: 15px;
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: transform 0.2s ease-in-out;
-    }
-    
-    .logo img {
-        width: auto;
-        height: 40px;
-    }
-    
-    .video-item:hover .logo img {
-        transform: scale(1.1); /* Subtle scaling on hover */
-    }
-    
-    .overlay {
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        right: 0;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        background-color: rgba(0, 0, 0, 0.5);
+        top: 0.5rem;
+        right: 0.5rem;
+        background: rgba(0, 0, 0, 0.8);
         color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+    }
+
+    .video-info {
+        padding: 1rem;
+    }
+
+    h3 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.1rem;
+        color: #fff;
+    }
+
+    .video-description {
+        font-size: 0.9rem;
+        color: #888;
+        margin-bottom: 1rem;
+        white-space: pre-wrap;
+        word-break: break-word;
+        max-height: 100px;
+        overflow-y: auto;
+    }
+
+    .video-source {
+        font-size: 0.8rem;
+        color: #888;
+        margin: 0.5rem 0;
+    }
+
+    .button-row {
         display: flex;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        padding: 12px;
-        border-radius: 8px;
-        opacity: 0;
-        transition: opacity 0.3s ease-in-out;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
     }
-    
-    .video-item:hover .overlay {
-        opacity: 1;
-    }
-    
-    .description {
-        margin: 0;
-        font-size: 1rem;
-        line-height: 1.4em; /* Increased line height for better readability */
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-    }
-    
-    .edit-video-text {
-        color: var(--highlight-color); /* Use highlight color for better visibility */
-        font-weight: bold; /* Emphasize the text */
-    }
-  
-    .edit-container {
-        width: 100%;
-        max-width: 800px;
-        margin: 30px auto;
-        padding: 20px;
-        background: rgba(255, 255, 255, 0.9); /* Light background for edit container */
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        position: relative; /* Position for children elements */
-    }
-  
-    .edit-container input,
-    .edit-container select {
-        width: 100%;
-        padding: 10px;
-        margin: 5px 0;
-        border-radius: 5px;
-        border: 1px solid #ccc; /* Clarity border */
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        color: black; /* Text color */
-        background: rgba(255, 255, 255, 0.8); /* Background for inputs */
-    }
-  
-    .edit-container button {
-        padding: 12px 25px; /* Adjusted padding */
-        margin-top: 15px; /* Adjusted margin */
+
+    .button-row button {
+        flex: 1;
+        padding: 0.5rem;
         border: none;
-        border-radius: 5px;
-        background-color: var(--primary-color); /* Primary color */
-        color: white; /* Keep button text color white */
+        border-radius: 4px;
         cursor: pointer;
-        transition: background-color 0.3s;
-    }
-  
-    .edit-container button:hover {
-        background-color: var(--hover-text-color); /* Darken the button on hover */
-    }
-  
-    .message {
-        margin: 10px 0;
-        padding: 10px;
-        border-radius: 5px;
-        display: inline-block;
-        background-color: rgba(255, 255, 255, 0.9); /* Light background for messages */
-        color: var(--text-color); /* Text color */
-    }
-  
-    .add-video-button,
-    .save-button {
-        display: block; /* Center button */
-        margin: 20px auto; /* Center horizontally */
-        padding: 10px 20px;
-        background-color: var(--primary-color);
+        font-weight: bold;
         color: white;
+    }
+
+    .edit-button {
+        background: #007bff;
+    }
+
+    .edit-button:hover {
+        background: #0056b3;
+    }
+
+    .delete-button {
+        background: #dc3545;
+    }
+
+    .delete-button:hover {
+        background: #c82333;
+    }
+
+    .controls {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .create-button, .save-order-button {
+        padding: 0.5rem 1rem;
         border: none;
-        border-radius: 5px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-        transition: background-color 0.3s;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
     }
-  
-    .add-video-button:hover,
-    .save-button:hover {
-        background-color: var(--hover-text-color); /* Darken on hover */
-    }
-  
-    .success {
-        background-color: var(--success-color);
+
+    .create-button {
+        background: #007bff;
         color: white;
     }
-  
-    .error {
-        background-color: var(--error-color);
+
+    .save-order-button {
+        background: #28a745;
         color: white;
     }
-    </style>
-    
+</style>
 
 <div class="container">
-    <h2>Draggable Video List</h2>
     {#if message}
         <div class="message {messageType}">{message}</div>
     {/if}
-    <div class="video-grid">
+
+    <div class="controls">
+        <button class="create-button" on:click={createNewVideo}>Add Video</button>
+        <button class="save-order-button" on:click={saveVideoOrder}>Save Video Order</button>
+    </div>
+
+    <div 
+        class="grid" 
+        role="grid"
+        tabindex="0"
+        on:dragover={handleDragOver}
+        on:drop={handleDrop}
+    >
         {#each videos as video (video.id)}
-            <div class="video-item"
-                 draggable="true"
-                 on:dragstart={e => handleDragStart(e, video.id)}
-                 on:dragover={handleDragOver}
-                 on:drop={e => handleDrop(e, video.id)}
-                 role="button"
-                 tabindex="0"
-                 on:click={() => handleClick(video.id)}
-                 on:keydown={e => e.key === 'Enter' && handleClick(video.id)}>
-                <img src={video.thumbnail} alt={video.description} />
-                <div class="logo">
-                    {#if video.showLogo}
-                        <img src={getLogoPath(video.logoType)} alt={video.logoType} class="small-logo" />
+            <div
+                class="video-item"
+                draggable="true"
+                on:dragstart={(e) => handleDragStart(e, video.id)}
+                on:dragend={handleDragEnd}
+                on:click={() => handleClick(video.id)}
+                on:keydown={(e) => e.key === 'Enter' && handleClick(video.id)}
+                class:dragging={draggedVideoId === video.id}
+                role="gridcell"
+                tabindex="0"
+                data-id={video.id}
+            >
+                <div class="thumbnail-wrapper">
+                    <img 
+                        src={video.thumbnail || getDefaultThumbnail(video.source_id || '')} 
+                        alt={video.name}
+                        class="thumbnail"
+                    />
+                    {#if video.show_logo}
+                        <div class="logo-badge">
+                            {video.logo_type}
+                        </div>
                     {/if}
                 </div>
-                <div class="overlay">
-                    <p class="description">{video.description}</p>
+                <div class="video-info">
+                    <h3>{video.name}</h3>
+                    <div class="video-description">{video.description}</div>
+                    <div class="video-source">
+                        Source: {video.source}
+                        {#if video.source === 'youtube'}
+                            <br>ID: {video.source_id}
+                        {:else}
+                            <br>ID: {video.source_id}
+                        {/if}
+                    </div>
                 </div>
             </div>
         {/each}
     </div>
 
     {#if editVideoId || isCreateMode}
-     <div class="edit-container">
-         <h3>{isCreateMode ? "Create New Video" : "Edit Video"}</h3>
-         <input type="text" bind:value={editedVideo.name} aria-label="Name" placeholder="Name" required />
-         <input type="text" bind:value={editedVideo.description} aria-label="Description" placeholder="Description" required />
-         <input type="text" bind:value={editedVideo.thumbnail} aria-label="Thumbnail URL" placeholder="Thumbnail URL" required />
-         <input type="text" bind:value={editedVideo.youtubeId} aria-label="YouTube ID" placeholder="YouTube ID" required />
-         <select bind:value={editedVideo.logoType}>
-             {#each logoOptions as { value, label }}
-                 <option value={value}>{label}</option>
-             {/each}
-         </select>
-         <label>
-             <input type="checkbox" bind:checked={editedVideo.showLogo} />
-             Show Logo
-         </label>
-         <button on:click={saveEditedVideo}>Save Changes</button>
-         {#if isCreateMode && editVideoId}
-             <button on:click={() => exitEditMode()}>Cancel</button>
-         {/if}
+        <div 
+            class="modal" 
+            on:click|self={closeModal}
+            on:keydown={(e) => e.key === 'Escape' && closeModal()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="dialog-title"
+        >
+            <div class="modal-content">
+                <h2 id="dialog-title">{editedVideo.id ? 'Edit Video' : 'Add Video'}</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="name">Name *</label>
+                        <input
+                            type="text"
+                            id="name"
+                            bind:value={editedVideo.name}
+                            required
+                        />
+                    </div>
 
-         <!-- Add the delete button here -->
-         {#if editVideoId}
-             <button class="deleteVideo" on:click={() => deleteVideo(editVideoId)}>Delete Video</button>
-         {/if}
-     </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea
+                            id="description"
+                            bind:value={editedVideo.description}
+                        ></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="source">Source</label>
+                        <select id="source" bind:value={editedVideo.source}>
+                            <option value="youtube">YouTube</option>
+                            <option value="vimeo">Vimeo</option>
+                            <option value="local">Local</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="source_id">Source ID</label>
+                        <input
+                            type="text"
+                            id="source_id"
+                            bind:value={editedVideo.source_id}
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="thumbnail">Thumbnail URL</label>
+                        <input
+                            type="text"
+                            id="thumbnail"
+                            bind:value={editedVideo.thumbnail}
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input
+                                type="checkbox"
+                                id="show_logo"
+                                bind:checked={editedVideo.show_logo}
+                            />
+                            <label for="show_logo">Show Logo</label>
+                        </div>
+                    </div>
+
+                    {#if editedVideo.show_logo}
+                        <div class="form-group">
+                            <label for="logo_type">Logo Type</label>
+                            <select 
+                                id="logo_type" 
+                                bind:value={editedVideo.logo_type}
+                            >
+                                <option value="none">None</option>
+                                <option value="Da">DA</option>
+                                <option value="logo">Yoann</option>
+                            </select>
+                        </div>
+                    {/if}
+                </div>
+
+                <div class="button-group">
+                    {#if !isCreateMode}
+                        <button 
+                            type="button"
+                            class="delete-button" 
+                            on:click={() => deleteVideo(editVideoId)}
+                        >
+                            Delete
+                        </button>
+                    {/if}
+                    <button 
+                        type="button"
+                        class="cancel-button" 
+                        on:click={closeModal}
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        type="button"
+                        class="save-button" 
+                        on:click={handleSave}
+                    >
+                        Save
+                    </button>
+                </div>
+            </div>
+        </div>
     {/if}
-
-    <button class="add-video-button" on:click={createNewVideo}>Add Video</button>
-    <button class="save-button" on:click={saveAllChanges}>Save All Changes</button>
 </div>

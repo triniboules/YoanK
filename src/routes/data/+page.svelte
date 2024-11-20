@@ -1,10 +1,16 @@
 <script lang="ts">
-    import { db, doc, getDoc } from '../../components/firebase';
+    import { onMount } from 'svelte';
+    import { browser } from '$app/environment';
+    import { supabase } from '../../lib/supabaseClient';
     import VideoManager from '../../components/VideoManager.svelte';
-    import GlobalUser from '../../components/Globaluser.svelte';
     import PolarAreaChart from '../../components/PolarAreaChart.svelte';
     import SiteClickStats from '../../components/SiteClickStats.svelte';
     import Background from '../../components/Background.svelte';
+    import ImportButton from '../../components/ImportButton.svelte';
+    import type { Database } from '../../lib/database.types';
+    import { importDefaultVideos } from '../../lib/utils/importDefaultVideos';
+
+    type Video = Database['public']['Tables']['videos']['Row'];
 
     let activeComponent: string | null = null;
     let showWelcome = true;
@@ -12,25 +18,45 @@
     let showLoginError = false; 
     let usernameInput = '';
     let passwordInput = '';
+    let mounted = false;
+    let videos: Video[] = [];
+    let loading = true;
+    let currentGridId: string | null = null;
 
-    const verifyPassword = async () => {
+    onMount(async () => {
+        mounted = true;
+        await loadVideos();
+    });
+
+    async function loadVideos() {
         try {
-            const userDoc = await getDoc(doc(db, 'users', 'Triniboules'));
-            if (userDoc.exists()) {
-                const storedPassword = userDoc.data()?.password;
-                if (passwordInput === storedPassword) {
-                    userAuthenticated = true;
-                    showLoginError = false;
-                    showWelcome = false;
-                } else {
-                    showLoginError = true;
-                }
-            } else {
-                showLoginError = true;
-            }
+            const { data, error } = await supabase
+                .from('videos')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            videos = data || [];
         } catch (error) {
-            console.error("Error fetching data from Firestore:", error);
-            showLoginError = true; 
+            console.error('Error loading videos:', error);
+        } finally {
+            loading = false;
+        }
+    }
+
+    const validCredentials = {
+        triniboules: 'soulvestre'
+    };
+
+    const verifyPassword = () => {
+        if (!browser || !mounted) return;
+        
+        if (validCredentials[usernameInput.toLowerCase()] === passwordInput) {
+            userAuthenticated = true;
+            showLoginError = false;
+            showWelcome = false;
+        } else {
+            showLoginError = true;
         }
     };
 
@@ -39,146 +65,229 @@
     };
 
     const showComponent = (component: string) => {
-        if (userAuthenticated) {
-            activeComponent = component;
-        } else {
-            showLoginError = true; 
+        activeComponent = component;
+    };
+
+    const handleKeyPress = (event: KeyboardEvent) => {
+        if (event.key === 'Enter') {
+            handleSubmit();
         }
     };
+
+    const handleVideoImported = () => {
+        loadVideos();
+    };
+
+    const handleGridCreated = (event: CustomEvent<{ gridId: string }>) => {
+        currentGridId = event.detail.gridId;
+        // You can use this gridId to update your grid display or do other operations
+    };
+
+    async function handleImportDefaultVideos() {
+        loading = true;
+        try {
+            const result = await importDefaultVideos();
+            if (!result.success) {
+                throw result.error;
+            }
+            await loadVideos();
+            currentGridId = result.gridId;
+        } catch (err) {
+            console.error('Failed to import default videos:', err);
+        } finally {
+            loading = false;
+        }
+    }
 </script>
 
-<Background />
+{#if showLoginError || !userAuthenticated}
+    <div class="login-form-wrapper">
+        {#if showLoginError}
+            <div class="error-message">
+                Invalid credentials. Please try again.
+            </div>
+        {/if}
+        <div class="login-form">
+            <input
+                type="text"
+                placeholder="Username"
+                bind:value={usernameInput}
+                on:keypress={handleKeyPress}
+            />
+            <input
+                type="password"
+                placeholder="Password"
+                bind:value={passwordInput}
+                on:keypress={handleKeyPress}
+            />
+            <button on:click={handleSubmit}>
+                Login
+            </button>
+        </div>
+    </div>
+{:else}
+    <div class="app-container">
+        <nav class="sidebar">
+            <button
+                class:active={activeComponent === 'videos'}
+                on:click={() => showComponent('videos')}
+            >
+                Video Manager
+            </button>
+            <button
+                class:active={activeComponent === 'stats'}
+                on:click={() => showComponent('stats')}
+            >
+                Statistics
+            </button>
+            <button
+                class:active={activeComponent === 'import'}
+                on:click={() => showComponent('import')}
+            >
+                Import Videos
+            </button>
+        </nav>
+
+        <div class="content">
+            {#if activeComponent === 'videos'}
+                <VideoManager {videos} on:videoUpdated={loadVideos} />
+            {:else if activeComponent === 'stats'}
+                {#if videos.length > 0}
+                    <div class="stats-container">
+                        <PolarAreaChart {videos} />
+                        <SiteClickStats {videos} />
+                    </div>
+                {:else}
+                    <p>No videos available for statistics.</p>
+                {/if}
+            {:else if activeComponent === 'import'}
+                <div class="import-container">
+                    <button 
+                        on:click={handleImportDefaultVideos} 
+                        disabled={loading}
+                    >
+                        {loading ? 'Importing...' : 'Import Default Videos & Create Grid'}
+                    </button>
+                </div>
+            {:else}
+                <div class="welcome">
+                    <h1>Welcome to Video Management</h1>
+                    <p>Select an option from the sidebar to get started.</p>
+                </div>
+            {/if}
+        </div>
+    </div>
+{/if}
+
 <style>
-    /* Local Styles */
-    :root {
-        --primary-color: #007BFF; 
-        --success-color: #28a745; 
-        --error-color: #dc3545; 
-        --text-color: #333333; 
-        --overlay-background: rgba(255, 255, 255, 0); 
+    :global(body) {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        width: 100vw;
+        background: #1a1a1a;
     }
 
-    .background {
-        
-        padding: 20px; 
-        
+    .login-form-wrapper {
         display: flex;
-        flex-direction: column; 
-        align-items: center; 
-        position: relative; 
-        background-color: var(--overlay-background); 
-        overflow: hidden; /* Added to hide overflowing content */
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        width: 100vw;
+        background: #1a1a1a;
+        padding: 2rem;
     }
 
-    .glass-container {
-        backdrop-filter: blur(10px); 
-        border-radius: 12px; 
-     
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); 
-        display: flex; 
-        flex-direction: column; 
-        align-items: center; 
-        position: relative; 
-        z-index: 1; 
-        background-color: rgba(255, 255, 255, 0.911); 
-    }
-
-    .header {
-        font-size: 2rem; 
-       
-        text-align: justify; 
-        color: var(--text-color);
-    }
-
-    .error-message {
-        color: var(--error-color); 
+    .login-form {
+        background: #2a2a2a;
+        padding: 2rem;
+        border-radius: 8px;
+        width: 100%;
+        max-width: 400px;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
     }
 
     input {
-        width: 100%; 
-        padding: 10px; 
-        margin: 5px 0; 
-        border: 1px solid #ccc; 
-        border-radius: 5px; 
+        padding: 0.5rem;
+        border: 1px solid #444;
+        border-radius: 4px;
+        background: #333;
+        color: #fff;
+        width: 100%;
     }
 
-    .button-grid {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-evenly; 
-        align-items: center;
-        width: 80%;
-        height: 70px; 
-        position: relative; 
-        top: 0; 
-        left: 10%; 
-        gap: 10px;
-        background: rgba(255, 255, 255, 0); 
-        border-bottom: 1px solid #ccc; 
-        z-index: 1000; 
-    }
-
-    .button {
-        background: linear-gradient(135deg, #6e94bd54, #4890dda8); 
+    button {
+        padding: 0.5rem 1rem;
+        background: #007bff;
+        color: white;
         border: none;
-        border-radius: 10px; 
-        padding: 12px 15px; 
+        border-radius: 4px;
         cursor: pointer;
-        transition: transform 0.2s ease, box-shadow 0.2s ease; 
-        font-size: 1rem; 
-        color: white; 
-        font-weight: bold;
-        text-transform: uppercase; 
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
-        position: relative;
-        overflow: hidden;
+        width: 100%;
     }
-    
 
-    /* Media query for extra small screens */
-    @media (max-width: 680px) {
-    
+    button:hover {
+        background: #0056b3;
+    }
 
-        .button {
-            font-size: 0.65rem;
-        }
+    .error-message {
+        color: #ff4444;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .app-container {
+        display: flex;
+        width: 100vw;
+        min-height: 100vh;
+        background: #1a1a1a;
+    }
+
+    .sidebar {
+        width: 200px;
+        padding: 1rem;
+        background: #2a2a2a;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .sidebar button {
+        text-align: left;
+        background: transparent;
+        padding: 0.5rem;
+    }
+
+    .sidebar button.active {
+        background: #007bff;
+    }
+
+    .content {
+        flex: 1;
+        padding: 1rem;
+        width: 100%;
+    }
+
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+    }
+
+    .welcome {
+        text-align: center;
+        padding: 2rem;
+    }
+
+    h1 {
+        color: #fff;
+        margin-bottom: 1rem;
+    }
+
+    p {
+        color: #888;
     }
 </style>
-
-<div class="button-grid glass-container">
-    {#if userAuthenticated}
-        <button class="button" on:click={() => showComponent('VideoManager')}>Video Manager</button>
-        <button class="button" on:click={() => showComponent('GlobalUser')}>Global User</button>
-        <button class="button" on:click={() => showComponent('PolarAreaChart')}>Polar Area Chart</button>
-        <button class="button" on:click={() => showComponent('SiteClickStats')}>Site Click Stats</button>
-    {/if}
-</div>
-
-<div class="background">
-    {#if showLoginError || !userAuthenticated}
-        <div class="glass-container">
-            {#if showLoginError}
-                <h2 class="error-message">Access Denied. Please log in to access components.</h2>
-            {/if}
-            {#if !userAuthenticated}
-                <h2 class="header">Enter Your Credentials</h2>
-                <input type="text" bind:value={usernameInput} placeholder="Username" />
-                <input type="password" bind:value={passwordInput} placeholder="Password" />
-                <button class="button" on:click={handleSubmit}>Submit</button>
-            {/if}
-        </div>
-    {/if}
-
-    <!-- Dynamic Component Rendering -->
-    {#if userAuthenticated && activeComponent}
-        {#if activeComponent === 'VideoManager'}
-            <VideoManager />
-        {:else if activeComponent === 'GlobalUser'}
-            <GlobalUser />
-        {:else if activeComponent === 'PolarAreaChart'}
-            <PolarAreaChart />
-        {:else if activeComponent === 'SiteClickStats'}
-            <SiteClickStats />
-        {/if}
-    {/if}
-</div>

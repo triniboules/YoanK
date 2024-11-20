@@ -1,40 +1,59 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import { browser } from '$app/environment';
   import { v4 as uuidv4 } from 'uuid';
   import clsx from 'clsx';
   import Contact from '../components/Contact.svelte';
-  import { db, Timestamp, setDoc, doc, arrayUnion } from '../components/firebase';
-  import Background from '../components/Background.svelte';
+  import { recordHeaderClick } from '../components/firebase';
 
   let showContact = false;
-  const hasLocalStorage = typeof localStorage !== 'undefined';
+  let width = browser ? window.innerWidth : 1920;
+  let mounted = false;
 
-  let userId = hasLocalStorage ? localStorage.getItem('userId') : null;
-  if (!userId) {
-      userId = uuidv4();
-      if (hasLocalStorage) localStorage.setItem('userId', userId);
-  }
-
-  const toggleContact = () => (showContact = !showContact);
-  const refreshPage = () => window.location.reload();
-
-  const handleLogoClick = async (logoPosition: string) => {
-      try {
-          const logoRef = doc(db, 'header', logoPosition);
-          const clickTimestamp = Timestamp.now();
-          await setDoc(logoRef, { clicks: arrayUnion({ userId, timestamp: clickTimestamp }) }, { merge: true });
-          console.log(`Click recorded for ${logoPosition} logo`);
-      } catch (error) {
-          console.error(`Error recording click for ${logoPosition} logo:`, error);
-      }
-  };
+  onMount(() => {
+    mounted = true;
+    const updateWidth = () => {
+      width = window.innerWidth;
+    };
+    
+    window.addEventListener('resize', updateWidth);
+    updateWidth();
+    
+    return () => {
+      window.removeEventListener('resize', updateWidth);
+    };
+  });
 
   const handleLeftLogoClick = async () => {
-      await handleLogoClick('contact');
-      toggleContact();
+    if (!browser || !mounted) return;
+    
+    showContact = !showContact;
+    try {
+      await recordHeaderClick('logoLeft', uuidv4());
+    } catch (error) {
+      console.error('Error updating logo left clicks:', error);
+    }
   };
+
   const handleCenterLogoClick = async () => {
-      await handleLogoClick('logoCenter');
-      refreshPage();
+    if (!browser || !mounted) return;
+    
+    try {
+      await recordHeaderClick('logoCenter', uuidv4());
+    } catch (error) {
+      console.error('Error updating logo center clicks:', error);
+    }
+  };
+
+  const handleContactClick = async () => {
+    if (!browser || !mounted) return;
+    
+    showContact = !showContact;  
+    try {
+      await recordHeaderClick('contact', uuidv4());
+    } catch (error) {
+      console.error('Error updating contact clicks:', error);
+    }
   };
 </script>
 
@@ -50,7 +69,7 @@
       </button>
   </div>
   
-  <div class={clsx("logo-center", { hidden: window.innerWidth < 1200 })}>
+  <div class={clsx("logo-center", { hidden: width < 1200 })}>
       <button
         class="logo-center-button"
         on:click={handleCenterLogoClick}
@@ -59,10 +78,10 @@
       </button>
   </div>
   
-  <div class={clsx("contact", { hidden: window.innerWidth < 800, highlight: showContact })}>
+  <div class="logo-contact">
       <button
-        class={clsx("contact-button")}
-        on:click={handleLeftLogoClick}
+        class={clsx("contact-button", { hidden: width < 800 })}
+        on:click={handleContactClick}
         aria-label="Contact">
           <img src="/image/contact.webp" alt="Contact" />
       </button>
@@ -70,7 +89,7 @@
 </header>
 
 {#if showContact}
-<Contact close={toggleContact} />
+  <Contact on:close={() => (showContact = false)} />
 {/if}
 
 <style>
@@ -96,6 +115,12 @@ max-height: 50px;
   transform: translateX(-50%);
 }
 
+.logo-contact {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .logo-button,
 .logo-center-button,
 .contact-button {
@@ -103,6 +128,13 @@ max-height: 50px;
   border: none;
   padding: 0;
   cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.logo-button:hover,
+.logo-center-button:hover,
+.contact-button:hover {
+  transform: scale(1.05);
 }
 
 .logo-left img {
@@ -121,7 +153,6 @@ max-height: 50px;
   display: none;
 }
 
-
 @media (max-width: 1200px) {
   .logo-center {
     display: none;
@@ -129,10 +160,8 @@ max-height: 50px;
 }
 
 @media (max-width: 800px) {
-  .contact,
-  .logo-center {
+  .contact-button {
     display: none;
   }
-
 }
 </style>

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { db } from './firebase'; // Adjust the path to your firebase.js file
+  import { db } from '$lib/firebase';
   import { collection, getDocs } from 'firebase/firestore';
   import { PolarArea } from 'svelte-chartjs';
   import {
@@ -15,7 +15,7 @@
   ChartJS.register(Title, Tooltip, Legend, ArcElement, RadialLinearScale);
 
   interface Video {
-    id: string; // ID from Firebase
+    id: string;
     name: string;
     youtubeId: string;
     thumbnail: string;
@@ -29,11 +29,11 @@
   }
 
   interface VideoStats {
-    id: string; // ID from Firebase
+    id: string;
     clickCount: number;
     clicks: ClickStats[];
-    description: string; // Description from Firebase
-    thumbnail: string;   // Thumbnail from Firebase
+    description: string;
+    thumbnail: string;
   }
 
   let videos: Video[] = [];
@@ -41,43 +41,40 @@
   let loading: boolean = true;
 
   onMount(async () => {
-    await fetchVideos();
-    await fetchVideoClickStats();
-    loading = false; // Set loading to false after fetching both datasets
+    await fetchVideoStats();
+    loading = false;
   });
 
-  async function fetchVideos() {
+  async function fetchVideoStats() {
     try {
       const querySnapshot = await getDocs(collection(db, "videos"));
-      videos = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        name: doc.data().name || "", // Fetching the name
-        youtubeId: doc.data().youtubeId || "",
-        thumbnail: doc.data().thumbnail || "",
-        description: doc.data().description || "",
-        showLogo: doc.data().showLogo || false,
+      const processedVideos = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          name: data.name || "",
+          youtubeId: data.youtubeId || "",
+          thumbnail: data.thumbnail || "",
+          description: data.description || "",
+          showLogo: data.showLogo || false,
+          clickCount: data.clickCount || 0,
+          clicks: data.clicks || []
+        };
+      });
+      
+      videos = processedVideos;
+      videoStats = processedVideos.map(({ id, clickCount, clicks, description, thumbnail }) => ({
+        id,
+        clickCount,
+        clicks,
+        description,
+        thumbnail
       }));
     } catch (error) {
-      console.error("Error fetching videos: ", error);
+      console.error("Error fetching video stats: ", error);
     }
   }
 
-  async function fetchVideoClickStats() {
-    try {
-      const querySnapshot = await getDocs(collection(db, "videos"));
-      videoStats = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        clickCount: doc.data().clickCount || 0,
-        clicks: doc.data().clicks || [],
-        description: doc.data().description || "",
-        thumbnail: doc.data().thumbnail || "",
-      }));
-    } catch (error) {
-      console.error("Error fetching video click stats: ", error);
-    }
-  }
-
-  // Chart data preparation
   $: chartData = {
     labels: videoStats.map(video => videos.find(v => v.id === video.id)?.name || "Unknown Video"),
     datasets: [
@@ -89,187 +86,110 @@
           'rgba(54, 162, 235, 0.6)',
           'rgba(255, 206, 86, 0.6)',
           'rgba(75, 192, 192, 0.6)',
-          'rgba(153, 102, 255, 0.6)',
-          'rgba(255, 159, 64, 0.6)',
-          'rgba(255, 99, 132, 0.6)',
-          'rgba(54, 162, 235, 0.6)',
-          'rgba(255, 206, 86, 0.6)',
+          'rgba(153, 102, 255, 0.6)'
         ],
         borderColor: [
           'rgba(255, 99, 132, 1)',
           'rgba(54, 162, 235, 1)',
           'rgba(255, 206, 86, 1)',
           'rgba(75, 192, 192, 1)',
-          'rgba(153, 102, 255, 1)',
-          'rgba(255, 159, 64, 1)',
-          'rgba(255, 99, 132, 1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 206, 86, 1)',
+          'rgba(153, 102, 255, 1)'
         ],
-        borderWidth: 1,
-      },
-    ],
+        borderWidth: 1
+      }
+    ]
   };
 </script>
 
-<main class="stats-container">
-  {#if loading}
-    <div class="loading-container">
-      <div class="glass-container p-4 rounded-lg shadow-lg mb-4">
-        <p class="loading">Loading video stats...</p>
-        <div class="loader"></div> <!-- Adding a loader -->
-      </div>
-    </div>
-  {:else}
-    <div class="flex flex-col md:flex-row justify-between items-center space-x-4 md:space-x-0">
-      <div class="chart-container glass-container w-full md:w-2/3 p-4 rounded-lg shadow-lg mb-4">
-        <PolarArea data={chartData} options={{
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            tooltip: {
-              callbacks: {
-                label: (tooltipItem) => {
-                  const label = tooltipItem.label || '';
-                  const value = tooltipItem.raw || 0;
-                  return `${label}: ${value} clicks`;
-                },
-              },
-            },
-            legend: {
-              display: true,
-              position: 'top',
-            },
-          },
-          animation: {
-            duration: 1000,
-            easing: 'easeInOutQuart',
-          },
-        }} height={null} width={null} />
-      </div>
-      <div class="video-info-container glass-container w-full md:w-1/3 p-4 rounded-lg shadow-lg mb-4">
-        
-        <ul class="video-list">
-          {#each videos as video (video.id)}
-            <li class="video-item">
-              <img src={video.thumbnail} alt={video.name} class="video-thumbnail" />
-              <div class="video-details">
-                <h3 class="video-name">{video.name}</h3>
-                <p class="video-description">{video.description}</p>
-                {#each videoStats as stats (stats.id)}
-                  {#if stats.id === video.id}
-                    <p class="click-count">Clicks: {stats.clickCount}</p> <!-- Displaying click count -->
-                  {/if}
-                {/each}
-              </div>
-            </li>
-          {/each}
-        </ul>
-      </div>
-    </div>
-  {/if}
-</main>
-
-<style lang="css">
+<style lang="postcss">
   .stats-container {
-    display: flex;
-    
-    background-color: rgba(161, 161, 161, 0.336);
-    border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    font-family: 'Arial', sans-serif;
-    color: #333;
+    @apply w-full h-full flex flex-col items-center justify-center p-4;
   }
 
-  .glass-container {
-    backdrop-filter: blur(10px);
-    background-color: rgba(255, 255, 255, 0.85);
-    padding: 20px;
-    border-radius: 8px;
+  .chart-container {
+    @apply w-full max-w-4xl bg-white/95 backdrop-blur-md rounded-xl p-8 shadow-xl 
+           border border-white/20 transition-all duration-300;
+    height: 600px;
+  }
+
+  .chart-container:hover {
+    @apply bg-white/100 transform scale-[1.01] shadow-2xl;
   }
 
   .loading-container {
-    display: flex;
-    
-    justify-content: center;
-    align-items: center;
-    height: 400px;
+    @apply w-full h-64 flex items-center justify-center;
   }
 
   .loading {
-    text-align: center;
-    font-size: 1.8rem;
-    color: #555;
+    @apply text-black/80 text-lg font-medium flex items-center gap-2;
   }
 
-  .loader {
-    border: 5px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    border-top: 5px solid #007BFF;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-    margin-top: 10px;
+  .loading::after {
+    content: "";
+    @apply w-4 h-4 border-2 border-black/20 border-t-black/80 rounded-full animate-spin;
   }
 
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
-  .chart-container,
-  .video-info-container {
-    margin: 20px;
-    height: 75vh;
-  }
-
-  .video-info-container {
-
-    overflow-y: auto;
-  }
-
-
-  .video-list {
-    margin-left: auto;
-    list-style-type: none;
-    padding:20px;
-  }
-
-  .video-item {
-    display: flex;
-    align-items: center;
-    background-color: #f3f4f6;
-    padding: 10px;
-    margin-left: auto;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-  }
-
-  .video-item:hover {
-    background-color: #e5e7eb;
-  }
-
-  .video-thumbnail {
-    width: 200px;
-    height: auto;
-    border-radius: 5px;
-    margin-right: 10px;
-  }
-
-  .video-name {
-    font-weight: 600;
-    margin: 0;
-  }
-
-  .video-description {
-    font-size: 0.9rem;
-    color: #6b7280;
-  }
-
-  .click-count {
-    font-size: 0.9rem;
-    color: #ff4757; /* Change color for visibility */
-    font-weight: bold;
+  .chart-title {
+    @apply text-black/90 text-xl font-medium mb-4 text-center;
   }
 </style>
+
+<main class="stats-container">
+  {#if loading}
+    <div class="chart-container">
+      <div class="loading-container">
+        <p class="loading">Loading video statistics</p>
+      </div>
+    </div>
+  {:else}
+    <div class="chart-container">
+      <h2 class="chart-title">Video Engagement Distribution</h2>
+      <PolarArea
+        data={chartData}
+        options={{
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                color: 'rgba(0, 0, 0, 0.8)',
+                padding: 20,
+                font: {
+                  size: 14
+                }
+              }
+            },
+            tooltip: {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              padding: 12,
+              titleFont: {
+                size: 14
+              },
+              bodyFont: {
+                size: 13
+              }
+            }
+          },
+          scales: {
+            r: {
+              ticks: {
+                color: 'rgba(0, 0, 0, 0.7)',
+                backdropColor: 'transparent',
+                font: {
+                  size: 12
+                }
+              },
+              grid: {
+                color: 'rgba(0, 0, 0, 0.1)'
+              },
+              angleLines: {
+                color: 'rgba(0, 0, 0, 0.1)'
+              }
+            }
+          }
+        }}
+      />
+    </div>
+  {/if}
+</main>

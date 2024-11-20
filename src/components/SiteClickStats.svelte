@@ -1,12 +1,14 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { db } from './firebase.js';
-  import { collection, getDocs, QueryDocumentSnapshot } from 'firebase/firestore';
+  import { browser } from '$app/environment';
+  import { db } from '$lib/firebase';
+  import { collection, getDocs } from 'firebase/firestore';
+  import { fetchHeaderClicks } from './firebase';
 
   // Define props
-  export let containerClass: string | undefined = '';
-  export let loadingMessage: string = 'Loading statistics...';
-  export let errorMessageClass: string | undefined;
+  export let containerClass = '';
+  export let loadingMessage = 'Loading statistics...';
+  export let errorMessageClass = '';
 
   // Initialize state variables
   let uniqueVisitors = 0;
@@ -15,8 +17,9 @@
   let contactClicks = 0;
   let logoCenterClicks = 0;
   let logoLeftClicks = 0;
-  let loading = true;  // Loading state
-  let errorMessage: string | null = null;  // Error message state
+  let loading = true;
+  let errorMessage: string | null = null;
+  let mounted = false;
 
   // Define the Video type
   type Video = {
@@ -25,22 +28,37 @@
     clickCount: number;
   };
 
-  let videos: Video[] = []; // Explicitly typed videos array
+  let videos: Video[] = [];
+
+  onMount(async () => {
+    mounted = true;
+    if (browser) {
+      await loadStatistics();
+    }
+  });
 
   // Fetch all necessary statistics from Firestore
-  async function fetchStatistics() {
-    try {
-      const userSnap = await getDocs(collection(db, 'users'));
-      const videoClicksSnap = await getDocs(collection(db, 'videos'));
-      const headerSnap = await getDocs(collection(db, 'header'));
+  async function loadStatistics() {
+    if (!browser || !mounted) return;
 
+    try {
+      loading = true;
+      errorMessage = null;
+
+      // Fetch all data in parallel
+      const [userSnap, videoClicksSnap, headerClicks] = await Promise.all([
+        getDocs(collection(db, 'users')),
+        getDocs(collection(db, 'videos')),
+        fetchHeaderClicks()
+      ]);
+
+      // Process users and visits
       const uniqueUserIds = new Set<string>();
       const visitsPromises: Promise<void>[] = [];
 
       userSnap.forEach(userDoc => {
         uniqueUserIds.add(userDoc.id);
         const visitsSnap = collection(db, 'users', userDoc.id, 'visits');
-
         visitsPromises.push(
           getDocs(visitsSnap).then(visitsSnap => {
             totalVisits += visitsSnap.size;
@@ -51,227 +69,124 @@
       await Promise.all(visitsPromises);
       uniqueVisitors = uniqueUserIds.size;
 
-      videoClicks = sumField(videoClicksSnap.docs, 'clickCount');
-
-      headerSnap.docs.forEach(doc => {
-        switch (doc.id) {
-          case 'contact':
-            contactClicks = doc.data().clicks?.length || 0;
-            break;
-          case 'logoCenter':
-            logoCenterClicks = doc.data().clicks?.length || 0;
-            break;
-          case 'logoLeft':
-            logoLeftClicks = doc.data().clicks?.length || 0;
-            break;
-        }
+      // Process video clicks
+      videos = videoClicksSnap.docs.map(doc => {
+        const data = doc.data();
+        const clicks = data.clicks?.length || 0;
+        videoClicks += clicks;
+        return {
+          id: doc.id,
+          name: data.name || 'Unnamed Video',
+          clickCount: clicks
+        };
       });
 
-      // Fetch videos for additional statistics
-      await fetchVideos();
+      // Set header clicks from the fetched data
+      contactClicks = headerClicks.contactClicks;
+      logoCenterClicks = headerClicks.logoCenterClicks;
+      logoLeftClicks = headerClicks.logoLeftClicks;
+
     } catch (error) {
-      console.error('Error fetching statistics:', error);
+      console.error('Error loading statistics:', error);
       errorMessage = 'Failed to load statistics. Please try again later.';
     } finally {
       loading = false;
     }
   }
-
-  // Fetch video data from Firestore
-  async function fetchVideos() {
-    try {
-      const videoSnap = await getDocs(collection(db, 'videos'));
-      videos = videoSnap.docs.map(doc => ({
-        id: doc.id,
-        name: doc.data().name || "",
-        clickCount: doc.data().clickCount || 0,
-      })) as Video[]; // Cast to Video[]
-    } catch (error) {
-      console.error('Error fetching videos:', error);
-      errorMessage = 'Failed to load video statistics.';
-    }
-  }
-
-  // Helper function to sum a specific field across documents
-  function sumField(docs: QueryDocumentSnapshot<any>[], field: string): number {
-    return docs.reduce((acc, doc) => acc + (doc.data()[field] || 0), 0);
-  }
-
-  // Fetch statistics when component is mounted
-  onMount(() => {
-    fetchStatistics();
-  });
 </script>
 
-<!-- UI Structure -->
-<div class="{containerClass} stats-container">
+<div class={containerClass || ''}>
   {#if loading}
-    <div class="loading-container ">
+    <div class="loading-container">
       <p class="loading">{loadingMessage}</p>
-      <div class="loader"></div> <!-- Adding a loader -->
     </div>
   {:else if errorMessage}
-    <p class="{errorMessageClass}">{errorMessage}</p>
+    <div class="error {errorMessageClass || ''}">
+      {errorMessage}
+    </div>
   {:else}
-    <div class="stats-grid ">
-      <div class="stat-item">
-        <span>Unique Visitors:</span>
-        <strong>{uniqueVisitors}</strong>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-icon">👥</span>
+        <span class="stat-value">{uniqueVisitors}</span>
+        <span class="stat-label">Unique Visitors</span>
       </div>
-      <div class="stat-item">
-        <span>Total Visits:</span>
-        <strong>{totalVisits}</strong>
+      
+      <div class="stat-card">
+        <span class="stat-icon">🔄</span>
+        <span class="stat-value">{totalVisits}</span>
+        <span class="stat-label">Total Visits</span>
       </div>
-      <div class="stat-item">
-        <span>Video Clicks:</span>
-        <strong>{videoClicks}</strong>
+      
+      <div class="stat-card">
+        <span class="stat-icon">📹</span>
+        <span class="stat-value">{videoClicks}</span>
+        <span class="stat-label">Video Interactions</span>
       </div>
-      <div class="stat-item">
-        <span>Contact Clicks:</span>
-        <strong>{contactClicks}</strong>
+      
+      <div class="stat-card">
+        <span class="stat-icon">📧</span>
+        <span class="stat-value">{contactClicks}</span>
+        <span class="stat-label">Contact Clicks</span>
       </div>
-      <div class="stat-item">
-        <span>Logo Center Clicks:</span>
-        <strong>{logoCenterClicks}</strong>
+      
+      <div class="stat-card">
+        <span class="stat-icon">🎯</span>
+        <span class="stat-value">{logoCenterClicks}</span>
+        <span class="stat-label">Center Logo Clicks</span>
       </div>
-      <div class="stat-item">
-        <span>Logo Left Clicks:</span>
-        <strong>{logoLeftClicks}</strong>
-      </div>
-      <!-- Display additional video statistics -->
-      <div class="video-stats">
-        <h3 class="video-stats-header">Video Statistics</h3>
-        {#each videos as video (video.id)}
-          <div class="video-stat-item">
-            <span class="video-name">{video.name}</span>
-            <strong class="video-clicks">Clicks: {video.clickCount}</strong>
-          </div>
-        {/each}
+      
+      <div class="stat-card">
+        <span class="stat-icon">🖼️</span>
+        <span class="stat-value">{logoLeftClicks}</span>
+        <span class="stat-label">Left Logo Clicks</span>
       </div>
     </div>
   {/if}
 </div>
 
-<style>
-  .stats-container {
-
-    
-    padding: 20px;
-    backdrop-filter: blur(10px);
-    background-color: #f9fafbe3; /* Semi-transparent background */
-    border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-    font-family: 'Arial', sans-serif;
-    color: #333;
-    
+<style lang="postcss">
+  .stats-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 w-full max-w-6xl mx-auto;
   }
 
-  .glass-container {
-    
-    backdrop-filter: blur(10px);
-    background-color: rgba(255, 255, 255, 0.85); /* Glass effect */
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px; /* Spacing between elements */
+  .stat-card {
+    @apply bg-black/20 backdrop-blur-md rounded-xl p-6 
+           border border-white/10 shadow-xl transition-all duration-300
+           flex flex-col items-center justify-center text-center;
+  }
+
+  .stat-card:hover {
+    @apply bg-black/30 transform scale-[1.02] shadow-2xl;
+  }
+
+  .stat-value {
+    @apply text-3xl font-bold text-white mb-2;
+  }
+
+  .stat-label {
+    @apply text-white/70 text-sm uppercase tracking-wider;
+  }
+
+  .stat-icon {
+    @apply text-2xl mb-3 text-white/90;
   }
 
   .loading-container {
-    
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 400px;
+    @apply w-full flex items-center justify-center p-8;
   }
 
   .loading {
-    text-align: center;
-    font-size: 1.8rem;
-    color: #555;
+    @apply text-white/80 text-lg font-medium flex items-center gap-2;
   }
 
-  .loader {
-    border: 5px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    border-top: 5px solid #007BFF;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-    margin-top: 10px;
+  .loading::after {
+    content: "";
+    @apply w-4 h-4 border-2 border-white/20 border-t-white/80 rounded-full animate-spin;
   }
 
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    width: 100%;
-    gap: 15px; /* Increased gap for better separation */
-    box-sizing: border-box;
-  }
-
-  .stat-item {
-    background: white;
-    padding: 20px; /* Increased padding for better clickability */
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    text-align: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s;
-  }
-
-  .stat-item:hover {
-    transform: scale(1.02); /* Slight hover effect */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  }
-
-  .stat-item span {
-    display: block;
-    color: #333; /* Darker text color for better readability */
-    font-size: 16px; /* Increased font size */
-    margin-bottom: 5px;
-    font-weight: bold; /* Bold text */
-  }
-
-  .stat-item strong {
-    font-size: 22px; /* Increased font size for emphasis */
-    color: #2c3e50; /* Darker shade for strong emphasis */
-  }
-
-  .video-stats {
-    grid-column: span 3; /* Take full width */
-    margin-top: 20px;
-    background: white;
-    padding: 15px;
-    border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  }
-
-  .video-stats-header {
-    color: #333; /* Dark color for header text */
-    font-size: 20px; /* Increased font size for visibility */
-    margin-bottom: 10px; /* Margin for spacing */
-  }
-
-  .video-stat-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-  }
-
-  .video-stat-item:last-child {
-    border-bottom: none; /* Remove border for last item */
-  }
-
-  .video-name {
-    font-weight: bold; /* Emphasis on video name */
-  }
-
-  .video-clicks {
-    color: #3498db; /* Blue for clicks count */
+  .error {
+    @apply text-red-400 bg-red-500/10 px-4 py-2 rounded-lg backdrop-blur-sm
+           border border-red-500/20 shadow-lg text-center w-full max-w-md mx-auto;
   }
 </style>
